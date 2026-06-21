@@ -1,18 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="ig" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#5cc6f0"/>
-      <stop offset="0.55" stop-color="#2aa86a"/>
-      <stop offset="1" stop-color="#168a4b"/>
+    <linearGradient id="ag" x1="14" y1="6" x2="50" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b6f06a"/>
+      <stop offset="0.5" stop-color="#46b95a"/>
+      <stop offset="1" stop-color="#1c7e3f"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="15" fill="url(#ig)"/>
-  <ellipse cx="32" cy="11" rx="26" ry="9" fill="#ffffff" opacity="0.14"/>
-  <g fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M14 31 32 17 50 31"/>
-    <path d="M19 30 V48 H45 V30"/>
-    <path d="M32 17 V48"/>
-    <path d="M19 39 H45"/>
-  </g>
-  <rect x="28" y="39" width="8" height="9" rx="1.4" fill="#ffffff"/>
+  <rect width="64" height="64" rx="15" fill="#16432a"/>
+  <g fill="url(#ag)"><path transform="rotate(0.0 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(25.71 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(51.43 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(77.14 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(102.86 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(128.57 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(154.29 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(180.0 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(205.71 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(231.43 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(257.14 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(282.86 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(308.57 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/><path transform="rotate(334.29 32 32)" d="M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z"/></g>
+  <circle cx="32" cy="32" r="3.2" fill="#16432a"/>
 </svg>
