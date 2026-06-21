@@ -45,6 +45,7 @@ const UI = (() => {
     list:    '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
     clock:   '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
     pin:     '<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/>',
+    shield:  '<path d="M12 3 5 6v5c0 5 3.5 8 7 10 3.5-2 7-5 7-10V6l-7-3Z"/><path d="m9 11.5 2 2 4-4.2"/>',
   };
   function icon(name, cls, size) {
     const p = ICONS[name] || ICONS.tag;

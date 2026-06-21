@@ -41,8 +41,7 @@ window.Views = window.Views || {};
     const play = `<svg class="sb-ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="#00d7fe" d="M3.6 1.8C3.4 2 3.3 2.3 3.3 2.7v18.6c0 .4.1.7.3.9l10.4-10.2L3.6 1.8Z"/><path fill="#00f076" d="M3.6 1.8 14 12l3.2-3.2L5.9.9C5.1.5 4.2.9 3.6 1.8Z"/><path fill="#ffce00" d="M14 12l3.2 3.2 3.5-2c.9-.5.9-1.6 0-2.1l-3.5-2L14 12Z"/><path fill="#ff3b30" d="M3.6 22.2c.6.9 1.5 1.2 2.3.8l11.3-6.6L14 12 3.6 22.2Z"/></svg>`;
     const badge = (ic, top, name) => `<a class="store-badge" data-act="enterApp" role="button">${ic}<span class="sb-tx"><small>${top}</small><b>${name}</b></span></a>`;
 
-    const medal = `<svg viewBox="0 0 36 36" aria-hidden="true"><path d="M11 3 17 15 13 17 8 6Z" fill="#3a92e0"/><path d="M25 3 28 6 23 17 19 15Z" fill="#e0703a"/><circle cx="18" cy="23" r="11" fill="#ffd45e"/><circle cx="18" cy="23" r="11" fill="none" stroke="#e8a92a" stroke-width="1.6"/><path d="M18 17l1.8 3.9 4.3.4-3.2 2.8 1 4.2L18 26.9l-3.9 1.4 1-4.2-3.2-2.8 4.3-.4Z" fill="#fff"/></svg>`;
-    const award = (b, s) => `<div class="award">${medal}<b>${b}</b><span>${s}</span></div>`;
+    const award = (ic, color, b, s) => `<div class="award"><span class="aw-ic" style="--c:${color}">${UI.icon(ic, '', 21)}</span><b>${b}</b><span>${s}</span></div>`;
 
     return `<div class="lnd">
       <section class="lnd-hero">
@@ -74,9 +73,9 @@ window.Views = window.Views || {};
 
         <div class="lnd-awards-eyebrow">Reconocimientos</div>
         <div class="lnd-awards">
-          ${award('100%', 'Funciona sin internet')}
-          ${award('Privado', 'Tus datos solo en tu equipo')}
-          ${award('Morelia', 'Hecho en México')}
+          ${award('checkc', '#178a4b', '100%', 'Funciona sin internet')}
+          ${award('shield', '#3a92e0', 'Privado', 'Datos solo en tu equipo')}
+          ${award('pin', '#c4790f', 'Morelia', 'Hecho en México')}
         </div>
 
         <div class="lnd-card2">
