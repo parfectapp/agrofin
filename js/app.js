@@ -1,13 +1,14 @@
 /* ============ INVERNA · App shell, router y acciones ============ */
 const App = (() => {
-  const db = Store.load();
-  // usuario nuevo: muestra datos de ejemplo para previsualizar (a menos que haya vaciado a propósito)
-  if (!db.seeded && !db.meta.cleared) { Data.seed(db); Store.save(db); }
+  let userId = Store.session();
+  let db = userId ? Store.load(userId) : Store.empty();
+  // datos de ejemplo para previsualizar (a menos que la cuenta haya vaciado a propósito)
+  if (userId && !db.seeded && !db.meta.cleared) { Data.seed(db); Store.save(userId, db); }
 
-  const state = { period: UI.todayKey(), gastoCat: '', cliSeg: 'clientes', pedFilter: 'todos', bitSeg: 'bitacora', taskFilter: 'todos', invKind: 'insumo' };
-  let route = db.meta.entered ? 'home' : 'landing';
+  const state = { period: UI.todayKey(), gastoCat: '', cliSeg: 'clientes', pedFilter: 'todos', bitSeg: 'bitacora', taskFilter: 'todos', invKind: 'insumo', authMode: 'signup', authErr: null };
+  let route = userId ? 'home' : 'landing';
 
-  function save() { Store.save(db); }
+  function save() { if (userId) Store.save(userId, db); }
   function go(r) { route = r; window.scrollTo(0, 0); render(); }
 
   function shiftMonth(key, d) { let [y, m] = key.split('-').map(Number); m += d; while (m < 1) { m += 12; y--; } while (m > 12) { m -= 12; y++; } return y + '-' + String(m).padStart(2, '0'); }
@@ -27,8 +28,11 @@ const App = (() => {
 
   function render() {
     const root = document.getElementById('root');
-    document.body.classList.toggle('landing', route === 'landing');
+    const full = (route === 'landing' || route === 'auth');
+    document.body.classList.toggle('landing', full);
     if (route === 'landing') { root.innerHTML = `<div class="fadein">${Views.landing()}</div>`; return; }
+    if (route === 'auth') { root.innerHTML = `<div class="fadein">${Views.auth()}</div>`; return; }
+    if (!userId) { route = 'landing'; root.innerHTML = `<div class="fadein">${Views.landing()}</div>`; return; }
     const view = Views[route] || Views.home;
     root.innerHTML = `<div class="screen"><div class="fadein">${view()}</div></div>` + tabbar();
   }
@@ -49,7 +53,32 @@ const App = (() => {
   /* ============ acciones ============ */
   const A = {
     go: el => go(el.dataset.route),
-    enterApp: () => { db.meta.entered = true; save(); go('home'); },
+    goAuth: el => { state.authMode = (el && el.dataset.mode) || 'signup'; state.authErr = null; go('auth'); },
+    setAuthMode: el => { state.authMode = el.dataset.mode; state.authErr = null; render(); },
+    async doAuth() {
+      const mode = state.authMode;
+      const name = val('au-name'), pw = val('au-pw');
+      const fail = m => { state.authErr = m; render(); };
+      if (name.length < 2) return fail('Escribe tu nombre');
+      if (pw.length < 4) return fail('La contraseña necesita 4 caracteres o más');
+      const key = name.toLowerCase();
+      const us = Store.users();
+      const h = await Store.hash(pw);
+      if (mode === 'signup') {
+        if (us.some(u => u.name.toLowerCase() === key)) return fail('Ya existe una cuenta con ese nombre');
+        const id = Store.uid();
+        us.push({ id, name, pw: h }); Store.saveUsers(us); Store.setSession(id);
+        userId = id; db = Store.empty(); Data.seed(db); Store.save(id, db);
+        state.authErr = null; UI.toast('¡Cuenta creada!'); go('home');
+      } else {
+        const u = us.find(x => x.name.toLowerCase() === key);
+        if (!u || u.pw !== h) return fail('Nombre o contraseña incorrectos');
+        Store.setSession(u.id); userId = u.id; db = Store.load(u.id);
+        if (!db.seeded && !db.meta.cleared) { Data.seed(db); Store.save(u.id, db); }
+        state.authErr = null; go('home');
+      }
+    },
+    logout() { Store.setSession(null); userId = null; db = Store.empty(); state.authErr = null; UI.closeSheet(); go('landing'); },
     seeLanding: () => { UI.closeSheet(); go('landing'); },
     goCortes: () => go('cortes'),
     goReceivable: () => { state.cliSeg = 'pedidos'; state.pedFilter = 'cobrar'; go('clientes'); },
@@ -244,10 +273,10 @@ const App = (() => {
     },
     resetDemo: () => UI.modal(`<div class="h3 mb8">¿Cargar datos de ejemplo?</div><p class="muted small mb16">Reemplaza lo que tengas ahora por datos de muestra para que veas cómo funciona la app.</p>
       <div class="btn-row"><button class="btn btn-ghost" data-act="closeSheet">Cancelar</button><button class="btn btn-danger" data-act="doReset">Cargar ejemplo</button></div>`),
-    doReset() { Object.assign(db, Store.empty()); Data.seed(db); save(); UI.closeSheet(); state.period = UI.todayKey(); go('home'); UI.toast('Ejemplo recargado'); },
+    doReset() { db = Store.empty(); Data.seed(db); save(); UI.closeSheet(); state.period = UI.todayKey(); go('home'); UI.toast('Ejemplo recargado'); },
     wipeAll: () => UI.modal(`<div class="h3 mb8">¿Borrar todo?</div><p class="muted small mb16">Se eliminan todos tus gastos, cortes, clientes y notas de este teléfono. No se puede deshacer.</p>
       <div class="btn-row"><button class="btn btn-ghost" data-act="closeSheet">Cancelar</button><button class="btn btn-danger" data-act="doWipe">Borrar todo</button></div>`),
-    doWipe() { Object.assign(db, Store.empty()); db.meta.cleared = true; save(); UI.closeSheet(); state.period = UI.todayKey(); go('landing'); UI.toast('Listo, empezamos de cero'); },
+    doWipe() { db = Store.empty(); db.meta.cleared = true; save(); UI.closeSheet(); state.period = UI.todayKey(); go('home'); UI.toast('Listo, empezamos de cero'); },
   };
 
   /* ---- delegación de eventos ---- */
@@ -277,7 +306,11 @@ const App = (() => {
   }
 
   return {
-    db, save, go, render,
+    save, go, render,
+    get db() { return db; },
+    get authMode() { return state.authMode; },
+    get authErr() { return state.authErr; },
+    get userName() { const u = Store.users().find(x => x.id === userId); return u ? u.name : ''; },
     get route() { return route; },
     get period() { return state.period; },
     get gastoCat() { return state.gastoCat; },

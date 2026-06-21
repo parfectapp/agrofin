@@ -83,7 +83,8 @@ window.Views = window.Views || {};
         <div class="lnd-tag">Control de tu invernadero</div>
         <div class="lnd-meta">Gastos · Trabajos · Riego · Producción · Ventas</div>
         <span class="lnd-beta">Beta</span>
-        <button class="btn btn-primary lnd-cta" data-act="enterApp">${UI.icon('sprout')} Entrar a mi invernadero</button>
+        <button class="btn btn-primary lnd-cta" data-act="goAuth" data-mode="signup">${UI.icon('sprout')} Crear cuenta gratis</button>
+        <button class="lnd-login" data-act="goAuth" data-mode="login">¿Ya tienes cuenta? Inicia sesión</button>
 
         <div class="lnd-stores">
           ${badge(apple, 'Descárgala en', 'App Store')}
@@ -122,13 +123,34 @@ window.Views = window.Views || {};
           <p class="lnd-c2-d">AGROFIN junta tus ventas y tus gastos del mes y te muestra tu <b>utilidad</b> de un vistazo.</p>
         </div>
 
-        <button class="btn btn-primary lnd-cta2" data-act="enterApp">${UI.icon('check')} Empezar ahora</button>
+        <button class="btn btn-primary lnd-cta2" data-act="goAuth" data-mode="signup">${UI.icon('check')} Crear cuenta gratis</button>
 
         <div class="lnd-foot">
           ${UI.logo(30)}
           <div class="lnd-foot-t">AGROFIN · v1 · Hecho para tu invernadero</div>
           <div class="lnd-foot-s">${UI.icon('info', '', 13)} Tus datos se guardan solo en este teléfono.</div>
         </div>
+      </section>
+    </div>`;
+  };
+
+  /* ---------------- crear cuenta / iniciar sesión ---------------- */
+  V.auth = function () {
+    const signup = App.authMode === 'signup';
+    return `<div class="lnd">
+      <section class="auth">
+        <button class="auth-back" data-act="go" data-route="landing">${UI.icon('back')} Volver</button>
+        <div class="auth-card">
+          <div class="center mb16">${UI.logo(56)}
+            <div class="h2 mt8">${signup ? 'Crea tu cuenta' : 'Inicia sesión'}</div>
+            <div class="small muted">${signup ? 'Para guardar el control de tu invernadero.' : 'Entra a tu invernadero.'}</div></div>
+          ${App.authErr ? `<div class="auth-err">${UI.icon('warn', '', 14)} ${App.authErr}</div>` : ''}
+          <label class="field"><span class="flbl">Tu nombre</span><input class="input" id="au-name" placeholder="Ej. André" autocomplete="off"></label>
+          <label class="field"><span class="flbl">Contraseña</span><input class="input" id="au-pw" type="password" placeholder="Mínimo 4 caracteres"></label>
+          <button class="btn btn-primary mt8" data-act="doAuth">${UI.icon(signup ? 'sprout' : 'check')} ${signup ? 'Crear cuenta' : 'Entrar'}</button>
+          <div class="auth-toggle">${signup ? '¿Ya tienes cuenta?' : '¿Eres nuevo?'} <button data-act="setAuthMode" data-mode="${signup ? 'login' : 'signup'}">${signup ? 'Inicia sesión' : 'Crea una cuenta'}</button></div>
+        </div>
+        <div class="auth-note">${UI.icon('info', '', 12)} Tu cuenta y tus datos se guardan solo en este teléfono.</div>
       </section>
     </div>`;
   };
@@ -198,7 +220,7 @@ window.Views = window.Views || {};
   V.settings = function () {
     const p = App.db.products;
     return `<div class="h2 mb4">Ajustes</div>
-      <p class="small muted mb16">Todo se guarda solo en este teléfono.</p>
+      <p class="small muted mb16">${App.userName ? 'Sesión de <b>' + UI.esc(App.userName) + '</b> · ' : ''}Todo se guarda solo en este teléfono.</p>
 
       ${`<div class="field"><span class="flbl">Nombre del invernadero</span>
         <div class="row gap8"><input class="input" id="set-name" value="${UI.esc(App.db.meta.name)}" style="flex:1"><button class="btn btn-sm btn-primary" data-act="saveName" style="width:auto">${UI.icon('check')}</button></div></div>`}
@@ -214,6 +236,7 @@ window.Views = window.Views || {};
       <button class="btn btn-ghost mt8" data-act="exportData">${UI.icon('download')} Exportar mis datos (.json)</button>
       <button class="btn btn-ghost mt8" data-act="resetDemo">${UI.icon('info')} Cargar datos de ejemplo</button>
       <button class="btn btn-danger mt8" data-act="wipeAll">${UI.icon('trash')} Borrar todo y empezar de cero</button>
+      <button class="btn btn-ghost mt8" data-act="logout">${UI.icon('back')} Cerrar sesión</button>
 
       <div class="center mt20">${UI.logo(28)}<div class="tiny muted mt4">AGROFIN · v1 · Hecho para tu invernadero</div></div>
       <button class="btn btn-ghost mt12" data-act="closeSheet">Cerrar</button>`;
