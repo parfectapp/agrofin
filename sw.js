@@ -1,5 +1,5 @@
 /* INVERNA · service worker — cache app shell para uso sin internet */
-const CACHE = 'inverna-v15';
+const CACHE = 'inverna-v16';
 const ASSETS = [
   './', './index.html', './manifest.json', './icon.svg',
   './css/styles.css?v=8',
