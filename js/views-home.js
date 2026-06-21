@@ -45,7 +45,6 @@ window.Views = window.Views || {};
 
     return `<div class="lnd">
       <section class="lnd-hero">
-        <div class="lnd-badge">${UI.logo(84)}</div>
         <h1 class="lnd-logo">AGROFIN</h1>
         <div class="lnd-tag">Control de tu invernadero</div>
         <div class="lnd-meta">Gastos · Trabajos · Riego · Producción · Ventas</div>
