@@ -132,6 +132,26 @@ img, svg { display: block; max-width: 100%; }
 .ib-scrim { position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(180deg, transparent 0%, transparent 16%, rgba(244,248,241,.32) 40%, rgba(244,248,241,.34) 60%, transparent 84%); }
 
+/* actividad agro animada en la pradera */
+.ib-activity { position: absolute; left: 0; right: 0; bottom: 0; height: 42vh; pointer-events: none; overflow: hidden; }
+.ib-activity svg { display: block; width: 100%; height: auto; }
+.ib-tractor { position: absolute; bottom: 4.5vh; width: 86px; left: 0; will-change: transform; animation: ibTractor 17s linear infinite; }
+.ib-tractor svg { filter: drop-shadow(0 4px 5px rgba(20,40,15,.22)); }
+.ib-tw { transform-box: fill-box; transform-origin: center; animation: ibSpin .9s linear infinite; }
+@keyframes ibSpin { to { transform: rotate(360deg); } }
+@keyframes ibTractor { 0% { transform: translateX(-110px); } 100% { transform: translateX(110vw); } }
+.ib-hen { position: absolute; bottom: 9vh; width: 32px; transform-origin: 50% 100%; will-change: transform; }
+.ib-hen svg { filter: drop-shadow(0 3px 4px rgba(20,40,15,.18)); }
+.ib-hen.h1 { left: 17%; animation: ibPeck 1.5s ease-in-out infinite; }
+.ib-hen.h2 { left: 60%; width: 28px; animation: ibPeck 1.8s ease-in-out infinite -.6s; }
+@keyframes ibPeck { 0%,55%,100% { transform: rotate(0); } 70% { transform: rotate(15deg); } 84% { transform: rotate(0); } }
+.ib-crate { position: absolute; bottom: 9vh; left: 41%; width: 40px; animation: ibBob 3s ease-in-out infinite; }
+.ib-crate svg { filter: drop-shadow(0 3px 4px rgba(20,40,15,.18)); }
+@keyframes ibBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+.ib-coin { position: absolute; bottom: 13vh; width: 18px; opacity: 0; will-change: transform, opacity; animation: ibCoin 3.6s ease-in infinite; }
+@keyframes ibCoin { 0% { transform: translateY(12px) scale(.5); opacity: 0; } 18% { opacity: 1; } 78% { opacity: 1; } 100% { transform: translateY(-94px) scale(1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ib-tractor, .ib-tw, .ib-hen, .ib-crate, .ib-coin { animation: none; } .ib-coin { opacity: .9; } }
+
 body.is-scrolling .ib-bird, body.is-scrolling .ib-bee, body.is-scrolling .ib-bug, body.is-scrolling .ib-cloud { animation-play-state: paused !important; }
 @media (prefers-reduced-motion: reduce) {
   .ib-bird, .ib-bee, .ib-bug, .ib-cloud, .ib-bwing, .ib-beew, .ib-bugw, .ib-pcrown, .ib-fl, .ib-lake-sh { animation: none !important; }

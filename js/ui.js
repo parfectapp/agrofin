@@ -53,14 +53,17 @@ const UI = (() => {
   }
   function logo(size) {
     const s = size || 32;
-    const blade = 'M32 28 C 39 26 45 18 44 8 C 43 6 41 6 39 8 C 35 16 30 21 32 28 Z';
-    let blades = '';
-    for (let k = 0; k < 14; k++) blades += `<path transform="rotate(${(k * 360 / 14).toFixed(2)} 32 32)" d="${blade}"/>`;
     return `<svg class="logo" width="${s}" height="${s}" viewBox="0 0 64 64" aria-hidden="true">
-      <defs><linearGradient id="agspin" x1="14" y1="6" x2="50" y2="58" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#b6f06a"/><stop offset=".5" stop-color="#46b95a"/><stop offset="1" stop-color="#1c7e3f"/></linearGradient></defs>
-      <rect width="64" height="64" rx="15" fill="#16432a"/>
-      <g fill="url(#agspin)">${blades}</g>
-      <circle cx="32" cy="32" r="3.4" fill="#16432a"/>
+      <defs><linearGradient id="invgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5cc6f0"/><stop offset=".55" stop-color="#2aa86a"/><stop offset="1" stop-color="#168a4b"/></linearGradient></defs>
+      <rect width="64" height="64" rx="15" fill="url(#invgrad)"/>
+      <ellipse cx="32" cy="11" rx="26" ry="9" fill="#ffffff" opacity=".14"/>
+      <g fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 31 32 17 50 31"/>
+        <path d="M19 30V48H45V30"/>
+        <path d="M32 17V48"/>
+        <path d="M19 39H45"/>
+      </g>
+      <rect x="28" y="39" width="8" height="9" rx="1.4" fill="#ffffff"/>
     </svg>`;
   }
 
