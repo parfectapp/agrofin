@@ -212,6 +212,14 @@ body.is-scrolling .ib-bird, body.is-scrolling .ib-bee, body.is-scrolling .ib-bug
 .warn-tx { color: var(--warn); }
 .divider { height: 1px; background: var(--line); margin: 16px 0; }
 
+/* ============ Banner de ciclo ============ */
+.cycle-banner { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 11px 14px; border-radius: 14px;
+  background: var(--brand-faint); border: 1px solid var(--brand-dim); cursor: pointer; }
+.cycle-banner:active { transform: scale(.99); }
+.cb-ic { color: var(--brand); display: grid; place-items: center; flex: none; }
+.cb-t { font-size: 14px; font-weight: 800; line-height: 1.1; }
+.cb-s { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+
 /* ============ Month nav ============ */
 .monthnav { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .mn-btn { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: var(--card); border: 1px solid var(--line); color: var(--text); box-shadow: var(--shadow); }
@@ -223,7 +231,8 @@ body.is-scrolling .ib-bird, body.is-scrolling .ib-bee, body.is-scrolling .ib-bug
 .stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); position: relative; }
 .stat[data-act] { cursor: pointer; }
 .stat[data-act]:active { transform: scale(.985); }
-.stat-ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 13%, transparent); margin-bottom: 8px; }
+.stat-ic { color: var(--c); margin-bottom: 8px; line-height: 0; }
+.stat-ic svg { width: 24px; height: 24px; }
 .stat-val { font-size: 22px; font-weight: 900; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .stat-lbl { font-size: 12.5px; color: var(--muted); font-weight: 700; margin-top: 1px; }
 .stat-sub { font-size: 11px; color: var(--muted2); font-weight: 700; margin-top: 3px; }
@@ -306,7 +315,8 @@ body.is-scrolling .ib-bird, body.is-scrolling .ib-bee, body.is-scrolling .ib-bug
 .lrow.tap { cursor: pointer; }
 .lrow.tap:active { opacity: .6; }
 .lrow.top { align-items: flex-start; }
-.lic { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; font-size: 13px; font-weight: 800; flex: none; }
+.lic { width: 30px; min-width: 30px; height: 30px; display: grid; place-items: center; font-size: 12.5px; font-weight: 800; flex: none; background: transparent !important; border-radius: 0; }
+.lic svg { width: 21px; height: 21px; }
 .lt { font-size: 14.5px; font-weight: 700; line-height: 1.25; }
 .ls { font-size: 12px; color: var(--muted); margin-top: 1px; }
 .lr { font-size: 14.5px; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }

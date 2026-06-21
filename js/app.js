@@ -2,7 +2,7 @@
 const App = (() => {
   const db = Store.load();   // un usuario nuevo arranca vacío; los datos de ejemplo son opcionales (Ajustes)
 
-  const state = { period: UI.todayKey(), gastoCat: '', cliSeg: 'clientes', pedFilter: 'todos', bitSeg: 'bitacora' };
+  const state = { period: UI.todayKey(), gastoCat: '', cliSeg: 'clientes', pedFilter: 'todos', bitSeg: 'bitacora', taskFilter: 'todos', invKind: 'insumo' };
   let route = db.meta.entered ? 'home' : 'landing';
 
   function save() { Store.save(db); }
@@ -10,14 +10,16 @@ const App = (() => {
 
   function shiftMonth(key, d) { let [y, m] = key.split('-').map(Number); m += d; while (m < 1) { m += 12; y--; } while (m > 12) { m -= 12; y++; } return y + '-' + String(m).padStart(2, '0'); }
 
+  const MAS_ROUTES = ['mas', 'tareas', 'riego', 'aplicaciones', 'inventario', 'bitacora'];
   function tabbar() {
-    const t = (r, ic, lb) => `<button class="${route === r ? 'on' : ''}" data-act="go" data-route="${r}">${UI.icon(ic)}<span>${lb}</span></button>`;
+    const on = r => ((r === 'mas' ? MAS_ROUTES.includes(route) : route === r) ? 'on' : '');
+    const t = (r, ic, lb) => `<button class="${on(r)}" data-act="go" data-route="${r}">${UI.icon(ic)}<span>${lb}</span></button>`;
     return `<nav class="tabbar t5">
       ${t('home', 'home', 'Resumen')}
       ${t('gastos', 'money', 'Gastos')}
       ${t('cortes', 'sprout', 'Cortes')}
       ${t('clientes', 'users', 'Clientes')}
-      ${t('bitacora', 'book', 'Bitácora')}
+      ${t('mas', 'list', 'Más')}
     </nav>`;
   }
 
@@ -170,6 +172,59 @@ const App = (() => {
     },
     delNote: el => confirmDel('notes', el.dataset.id, 'esta nota'),
 
+    /* ---- ciclo ---- */
+    openCycle: () => UI.sheet(Forms.cycle(db.cycle || {})),
+    saveCycle() { db.cycle = { name: val('cy-name') || 'Ciclo actual', crop: val('cy-crop'), variety: val('cy-variety'), start: val('cy-start') }; save(); UI.closeSheet(); UI.toast('Ciclo guardado'); render(); },
+
+    /* ---- trabajos ---- */
+    setTaskFilter: el => { state.taskFilter = el.dataset.v; render(); },
+    addTask: () => UI.sheet(Forms.task()),
+    editTask: el => { const t = find('tasks', el.dataset.id); if (t) UI.sheet(Forms.task(t)); },
+    saveTask(el) {
+      const id = el.dataset.id;
+      const title = val('t-title'); if (!title) return UI.toast('¿Qué trabajo es?');
+      const data = { title, status: sheetPick('status') || 'pendiente', date: val('t-date') || UI.todayISO(), cost: numv('t-cost'), note: val('t-note') };
+      if (id) Object.assign(find('tasks', id), data); else db.tasks.push({ id: Store.uid(), ...data });
+      save(); UI.closeSheet(); UI.toast(id ? 'Trabajo actualizado' : 'Trabajo agregado'); render();
+    },
+    delTask: el => confirmDel('tasks', el.dataset.id, 'este trabajo'),
+
+    /* ---- riego ---- */
+    addIrrig: () => UI.sheet(Forms.irrigation()),
+    editIrrig: el => { const r = find('irrigations', el.dataset.id); if (r) UI.sheet(Forms.irrigation(r)); },
+    saveIrrig(el) {
+      const id = el.dataset.id;
+      const data = { date: val('r-date') || UI.todayISO(), minutes: numv('r-min'), water: numv('r-water'), wunit: sheetPick('wunit') || 'm³', fert: numv('r-fert'), funit: sheetPick('funit') || 'L', note: val('r-note') };
+      if (id) Object.assign(find('irrigations', id), data); else db.irrigations.push({ id: Store.uid(), ...data });
+      save(); UI.closeSheet(); UI.toast(id ? 'Riego actualizado' : 'Riego registrado'); render();
+    },
+    delIrrig: el => confirmDel('irrigations', el.dataset.id, 'este riego'),
+
+    /* ---- aplicaciones foliares ---- */
+    addApp: () => UI.sheet(Forms.application()),
+    editApp: el => { const a = find('applications', el.dataset.id); if (a) UI.sheet(Forms.application(a)); },
+    saveApp(el) {
+      const id = el.dataset.id;
+      const product = val('a-product'); if (!product) return UI.toast('¿Qué producto aplicaste?');
+      const data = { date: val('a-date') || UI.todayISO(), product, dose: val('a-dose'), cost: numv('a-cost'), note: val('a-note') };
+      if (id) Object.assign(find('applications', id), data); else db.applications.push({ id: Store.uid(), ...data });
+      save(); UI.closeSheet(); UI.toast(id ? 'Aplicación actualizada' : 'Aplicación registrada'); render();
+    },
+    delApp: el => confirmDel('applications', el.dataset.id, 'esta aplicación'),
+
+    /* ---- inventario ---- */
+    setInvKind: el => { state.invKind = el.dataset.v; render(); },
+    addInv: () => UI.sheet(Forms.invItem({ kind: state.invKind })),
+    editInv: el => { const i = find('inventory', el.dataset.id); if (i) UI.sheet(Forms.invItem(i)); },
+    saveInv(el) {
+      const id = el.dataset.id;
+      const name = val('i-name'); if (!name) return UI.toast('Escribe el nombre');
+      const data = { name, kind: sheetPick('kind') || 'insumo', qty: numv('i-qty'), unit: val('i-unit'), note: val('i-note') };
+      if (id) Object.assign(find('inventory', id), data); else db.inventory.push({ id: Store.uid(), ...data });
+      save(); UI.closeSheet(); UI.toast(id ? 'Artículo actualizado' : 'Artículo guardado'); render();
+    },
+    delInv: el => confirmDel('inventory', el.dataset.id, 'este artículo'),
+
     /* ---- borrado genérico ---- */
     doDelete(el) { const k = el.dataset.kind; db[k] = db[k].filter(x => x.id !== el.dataset.id); save(); UI.closeSheet(); UI.toast('Eliminado'); render(); },
 
@@ -227,5 +282,7 @@ const App = (() => {
     get cliSeg() { return state.cliSeg; },
     get pedFilter() { return state.pedFilter; },
     get bitSeg() { return state.bitSeg; },
+    get taskFilter() { return state.taskFilter; },
+    get invKind() { return state.invKind; },
   };
 })();

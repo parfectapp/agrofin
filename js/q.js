@@ -42,6 +42,24 @@ const Q = (() => {
   const clientById = cid => db().clients.find(c => c.id === cid);
   const clientName = cid => { const c = clientById(cid); return c ? c.name : 'Cliente'; };
 
+  // ---- trabajos / tareas ----
+  function tasksAll() { return byDateDesc(db().tasks); }
+  function tasksBy(status) { return byDateDesc(db().tasks.filter(t => t.status === status)); }
+  function taskCount(status) { return db().tasks.filter(t => t.status === status).length; }
+  function tasksCost() { return sum(db().tasks, x => x.cost || 0); }
+
+  // ---- riegos ----
+  function irrigMonth(key) { return byDateDesc(inMonth(db().irrigations, key)); }
+  function waterMonth(key) { return sum(inMonth(db().irrigations, key), x => x.water || 0); }
+  function fertMonth(key) { return sum(inMonth(db().irrigations, key), x => x.fert || 0); }
+
+  // ---- aplicaciones foliares ----
+  function appsMonth(key) { return byDateDesc(inMonth(db().applications, key)); }
+  function appsCost(key) { return sum(inMonth(db().applications, key), x => x.cost || 0); }
+
+  // ---- inventario ----
+  function invBy(kind) { return db().inventory.filter(i => i.kind === kind).slice().sort((a, b) => a.name.localeCompare(b.name)); }
+
   // ---- resumen del mes ----
   function monthSummary(key) {
     const exp = expensesTotal(inMonth(db().expenses, key));
@@ -56,6 +74,8 @@ const Q = (() => {
     harvestsMonth, harvestKg, harvestByQuality, harvestByProduct,
     balance, isReceivable, ordersDesc, pendingOrders, salesMonth, receivableTotal,
     clientOrders, clientBalance, clientTotalSold, clientById, clientName,
+    tasksAll, tasksBy, taskCount, tasksCost,
+    irrigMonth, waterMonth, fertMonth, appsMonth, appsCost, invBy,
     monthSummary,
   };
 })();

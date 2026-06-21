@@ -30,6 +30,21 @@ const Data = (() => {
   ];
   const tagOf = id => LOGTAGS.find(t => t.id === id) || LOGTAGS[LOGTAGS.length - 1];
 
+  // ---- estados de trabajo / tarea ----
+  const TASKST = [
+    { id: 'pendiente', label: 'Pendiente',  color: '#c4790f' },
+    { id: 'proceso',   label: 'En proceso', color: '#3a92e0' },
+    { id: 'hecho',     label: 'Hecho',      color: '#178a4b' },
+  ];
+  const stOf = id => TASKST.find(s => s.id === id) || TASKST[0];
+
+  // ---- tipo de inventario ----
+  const INVKINDS = [
+    { id: 'insumo',   label: 'Insumo',   color: '#3a92e0' },
+    { id: 'producto', label: 'Producto', color: '#178a4b' },
+  ];
+  const kindOf = id => INVKINDS.find(k => k.id === id) || INVKINDS[0];
+
   // ---- datos de ejemplo (fechas relativas a hoy) ----
   function seed(db) {
     if (db.seeded) return;
@@ -78,8 +93,35 @@ const Data = (() => {
       { id: Store.uid(), title: 'Pendientes', text: 'Cotizar plástico nuevo para túnel 2.\nLlamar al técnico del pozo.', updatedAt: Date.now() },
     ];
 
+    db.cycle = { crop: 'Jitomate saladet', variety: 'Mosquetero', start: D(60), name: 'Ciclo actual' };
+
+    db.tasks = [
+      { id: Store.uid(), title: 'Tutoreo y bajado de planta', date: D(1), status: 'proceso',   cost: 1800, note: 'Surcos 1-6' },
+      { id: Store.uid(), title: 'Deshoje sanitario',          date: D(3), status: 'pendiente', cost: 0,    note: '' },
+      { id: Store.uid(), title: 'Poda de brotes',             date: D(6), status: 'hecho',     cost: 1200, note: '' },
+      { id: Store.uid(), title: 'Revisión de goteros',        date: D(0), status: 'pendiente', cost: 0,    note: 'Túnel 2' },
+    ];
+
+    db.irrigations = [
+      { id: Store.uid(), date: D(0), minutes: 45, water: 18, wunit: 'm³', fert: 12, funit: 'L', note: 'Lote A y B' },
+      { id: Store.uid(), date: D(2), minutes: 40, water: 16, wunit: 'm³', fert: 10, funit: 'L', note: '' },
+      { id: Store.uid(), date: D(4), minutes: 45, water: 18, wunit: 'm³', fert: 14, funit: 'L', note: '' },
+    ];
+
+    db.applications = [
+      { id: Store.uid(), date: D(2), product: 'Foliar Ca-B', dose: '300 ml/100 L', cost: 950, note: 'Preventivo' },
+      { id: Store.uid(), date: D(7), product: 'Bioestimulante', dose: '250 ml/100 L', cost: 1280, note: '' },
+    ];
+
+    db.inventory = [
+      { id: Store.uid(), name: 'Fertilizante NPK', kind: 'insumo', qty: 8, unit: 'sacos', note: '' },
+      { id: Store.uid(), name: 'Foliar Ca-B', kind: 'insumo', qty: 5, unit: 'L', note: '' },
+      { id: Store.uid(), name: 'Cajas de cosecha', kind: 'insumo', qty: 120, unit: 'cajas', note: '' },
+      { id: Store.uid(), name: 'Jitomate Primera', kind: 'producto', qty: 640, unit: 'kg', note: 'En frío' },
+    ];
+
     db.seeded = true;
   }
 
-  return { CATS, catOf, QUALITIES, qualOf, LOGTAGS, tagOf, seed };
+  return { CATS, catOf, QUALITIES, qualOf, LOGTAGS, tagOf, TASKST, stOf, INVKINDS, kindOf, seed };
 })();

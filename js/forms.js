@@ -114,5 +114,67 @@ const Forms = (() => {
       + saveBtn('saveNote', n.id, isEdit ? 'Guardar cambios' : 'Guardar nota');
   }
 
-  return { expense, harvest, client, order, payment, log, note };
+  /* ---------------- trabajo / tarea ---------------- */
+  function task(t = {}) {
+    const isEdit = !!t.id;
+    return head(isEdit ? 'Editar trabajo' : 'Nuevo trabajo', t.id, 'delTask')
+      + f('¿Qué trabajo?', inp('t-title', 'placeholder="Ej. Tutoreo y bajado de planta"', t.title))
+      + fblock('Estado', pick('status', Data.TASKST, t.status || 'pendiente'))
+      + f('Fecha', inp('t-date', 'type="date"', t.date || today()))
+      + f('Costo del trabajo (MXN, opcional)', inp('t-cost', 'type="number" inputmode="decimal" placeholder="0"', t.cost))
+      + f('Nota (opcional)', ta('t-note', t.note, 'Quién, surcos, detalles…'))
+      + saveBtn('saveTask', t.id, isEdit ? 'Guardar cambios' : 'Agregar trabajo');
+  }
+
+  /* ---------------- riego ---------------- */
+  function irrigation(r = {}) {
+    const isEdit = !!r.id;
+    return head(isEdit ? 'Editar riego' : 'Nuevo riego', r.id, 'delIrrig')
+      + f('Fecha', inp('r-date', 'type="date"', r.date || today()))
+      + f('Duración (min)', inp('r-min', 'type="number" inputmode="decimal" placeholder="0"', r.minutes))
+      + fblock('Agua aplicada',
+          `<div class="row gap8"><input class="input" id="r-water" type="number" inputmode="decimal" placeholder="0" value="${r.water != null ? r.water : ''}" style="flex:1">${pick('wunit', [{ id: 'm³', label: 'm³' }, { id: 'L', label: 'L' }], r.wunit || 'm³')}</div>`)
+      + fblock('Fertirriego aplicado',
+          `<div class="row gap8"><input class="input" id="r-fert" type="number" inputmode="decimal" placeholder="0" value="${r.fert != null ? r.fert : ''}" style="flex:1">${pick('funit', [{ id: 'L', label: 'L' }, { id: 'kg', label: 'kg' }], r.funit || 'L')}</div>`)
+      + f('Nota (opcional)', ta('r-note', r.note, 'Lote, fórmula, observaciones…'))
+      + saveBtn('saveIrrig', r.id, isEdit ? 'Guardar cambios' : 'Registrar riego');
+  }
+
+  /* ---------------- aplicación foliar ---------------- */
+  function application(a = {}) {
+    const isEdit = !!a.id;
+    return head(isEdit ? 'Editar aplicación' : 'Aplicación foliar', a.id, 'delApp')
+      + f('Fecha', inp('a-date', 'type="date"', a.date || today()))
+      + f('Producto', inp('a-product', 'placeholder="Ej. Foliar Ca-B"', a.product))
+      + f('Dosis', inp('a-dose', 'placeholder="Ej. 300 ml/100 L"', a.dose))
+      + f('Costo (MXN)', inp('a-cost', 'type="number" inputmode="decimal" placeholder="0"', a.cost))
+      + f('Nota (opcional)', ta('a-note', a.note, 'Objetivo, plaga, lote…'))
+      + saveBtn('saveApp', a.id, isEdit ? 'Guardar cambios' : 'Registrar aplicación');
+  }
+
+  /* ---------------- inventario ---------------- */
+  function invItem(i = {}) {
+    const isEdit = !!i.id;
+    return head(isEdit ? 'Editar artículo' : 'Nuevo artículo', i.id, 'delInv')
+      + fblock('Tipo', pick('kind', Data.INVKINDS, i.kind || 'insumo'))
+      + f('Nombre', inp('i-name', 'placeholder="Ej. Fertilizante NPK"', i.name))
+      + `<div class="row gap8">
+          ${f('Cantidad', inp('i-qty', 'type="number" inputmode="decimal" placeholder="0"', i.qty))}
+          ${f('Unidad', inp('i-unit', 'placeholder="kg, L, sacos, cajas…"', i.unit))}
+        </div>`
+      + f('Nota (opcional)', ta('i-note', i.note, ''))
+      + saveBtn('saveInv', i.id, isEdit ? 'Guardar cambios' : 'Guardar artículo');
+  }
+
+  /* ---------------- ciclo ---------------- */
+  function cycle(c = {}) {
+    return head('Ciclo de producción')
+      + f('Nombre del ciclo', inp('cy-name', 'placeholder="Ej. Ciclo actual"', c.name))
+      + f('Cultivo', inp('cy-crop', 'placeholder="Ej. Jitomate saladet"', c.crop))
+      + f('Variedad / semilla', inp('cy-variety', 'placeholder="Ej. Mosquetero"', c.variety))
+      + f('Inicio del ciclo', inp('cy-start', 'type="date"', c.start))
+      + saveBtn('saveCycle', '', 'Guardar ciclo');
+  }
+
+  return { expense, harvest, client, order, payment, log, note, task, irrigation, application, invItem, cycle };
 })();

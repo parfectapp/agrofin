@@ -48,7 +48,7 @@ window.Views = window.Views || {};
         <div class="lnd-badge">${UI.logo(84)}</div>
         <h1 class="lnd-logo">AGROFIN</h1>
         <div class="lnd-tag">Control de tu invernadero</div>
-        <div class="lnd-meta">Gastos · Producción · Clientes · Cobranza</div>
+        <div class="lnd-meta">Gastos · Trabajos · Riego · Producción · Ventas</div>
         <span class="lnd-beta">Beta</span>
         <button class="btn btn-primary lnd-cta" data-act="enterApp">${UI.icon('sprout')} Entrar a mi invernadero</button>
 
@@ -65,10 +65,12 @@ window.Views = window.Views || {};
         <div class="lnd-eyebrow">Todo tu invernadero, en un lugar</div>
         <h2 class="lnd-h2">Lleva el control sin complicarte</h2>
         <div class="lnd-feats">
-          ${feat('money', '#c4790f', 'Gastos', 'Agroquímicos, insumos, gasolina, equipos y sueldos, ordenados por categoría.')}
-          ${feat('sprout', '#178a4b', 'Cortes', 'Tu producción por fecha en kg o toneladas, con calidad Primera/Segunda/Tercera.')}
-          ${feat('users', '#3a92e0', 'Clientes', 'Pedidos, ventas y lo que te deben: siempre sabes cuánto tienes por cobrar.')}
-          ${feat('book', '#8a6df0', 'Bitácora', 'Riegos, fumigaciones, incidencias y notas, día con día.')}
+          ${feat('money', '#c4790f', 'Gastos y compras', 'Agroquímicos, insumos, gasolina, equipos y mano de obra.')}
+          ${feat('tool', '#178a4b', 'Trabajos', 'Pendientes, en proceso y hechos, con el costo de cada uno.')}
+          ${feat('droplet', '#3a92e0', 'Riego y fertirriego', 'Frecuencia, cantidades de agua y fertirriego aplicado.')}
+          ${feat('flask', '#8a6df0', 'Aplicaciones foliares', 'Producto, dosis y costo de cada aplicación.')}
+          ${feat('sprout', '#178a4b', 'Cortes por calidad', 'Producción por día en kg o toneladas, por calidad.')}
+          ${feat('users', '#c4790f', 'Clientes e inventario', 'Pedidos, ventas, precio de venta, por cobrar e inventario.')}
         </div>
 
         <div class="lnd-awards-eyebrow">Reconocimientos</div>
@@ -110,6 +112,12 @@ window.Views = window.Views || {};
       <div class="spacer"></div>
       <button class="iconbtn" data-act="openSettings" aria-label="Ajustes">${UI.icon('settings')}</button>
     </div>
+
+    ${App.db.cycle && App.db.cycle.crop ? `<div class="cycle-banner" data-act="go" data-route="mas">
+      <span class="cb-ic">${UI.icon('sprout', '', 17)}</span>
+      <div class="grow"><div class="cb-t">${UI.esc(App.db.cycle.crop)}</div><div class="cb-s">${App.db.cycle.variety ? 'Semilla ' + UI.esc(App.db.cycle.variety) : ''}${App.db.cycle.start ? ' · desde ' + UI.date(App.db.cycle.start) : ''}</div></div>
+      ${Q.taskCount('pendiente') > 0 ? `<span class="badge warn">${Q.taskCount('pendiente')} pend.</span>` : ''}${UI.icon('chevron', '', 16)}
+    </div>` : ''}
 
     ${monthNav()}
 
