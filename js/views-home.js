@@ -31,8 +31,8 @@ window.Views = window.Views || {};
   /* ---------------- landing / pantalla de inicio ---------------- */
   V.landing = function () {
     const feat = (ic, color, t, d) => `<div class="lnd-feat">
-      <span class="lnd-fic" style="--c:${color}">${UI.icon(ic, '', 20)}</span>
-      <div><div class="lnd-ft">${t}</div><div class="lnd-fd">${d}</div></div></div>`;
+      <div class="lnd-ft"><span class="lnd-fi" style="color:${color}">${UI.icon(ic, '', 18)}</span>${t}</div>
+      <div class="lnd-fd">${d}</div></div>`;
 
     const star = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.7 6.2.6-4.7 4.1 1.4 6.1L12 16.9 6.5 19.6l1.4-6.1L3.2 9.3l6.2-.6Z" fill="#ffce3a"/></svg>`;
     const stars = star.repeat(5);
