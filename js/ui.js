@@ -54,16 +54,12 @@ const UI = (() => {
   function logo(size) {
     const s = size || 32;
     return `<svg class="logo" width="${s}" height="${s}" viewBox="0 0 64 64" aria-hidden="true">
-      <defs><linearGradient id="invgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5cc6f0"/><stop offset=".55" stop-color="#2aa86a"/><stop offset="1" stop-color="#168a4b"/></linearGradient></defs>
+      <defs><linearGradient id="invgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2bb673"/><stop offset="1" stop-color="#138a4b"/></linearGradient></defs>
       <rect width="64" height="64" rx="15" fill="url(#invgrad)"/>
-      <ellipse cx="32" cy="11" rx="26" ry="9" fill="#ffffff" opacity=".14"/>
-      <g fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 31 32 17 50 31"/>
-        <path d="M19 30V48H45V30"/>
-        <path d="M32 17V48"/>
-        <path d="M19 39H45"/>
+      <g fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 51 L32 15 L45 51"/>
+        <path d="M24.5 39 H39.5"/>
       </g>
-      <rect x="28" y="39" width="8" height="9" rx="1.4" fill="#ffffff"/>
     </svg>`;
   }
 
