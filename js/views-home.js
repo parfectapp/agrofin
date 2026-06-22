@@ -83,8 +83,10 @@ window.Views = window.Views || {};
         <div class="lnd-tag">Control de tu invernadero</div>
         <div class="lnd-meta">Gastos · Trabajos · Riego · Producción · Ventas</div>
         <span class="lnd-beta">Beta</span>
-        <button class="btn btn-primary lnd-cta" data-act="goAuth" data-mode="signup">${UI.icon('sprout')} Crear cuenta gratis</button>
-        <button class="lnd-login" data-act="goAuth" data-mode="login">¿Ya tienes cuenta? Inicia sesión</button>
+        <div class="lnd-ctas">
+          <button class="btn btn-primary" data-act="goAuth" data-mode="signup">${UI.icon('sprout')} Crear cuenta gratis</button>
+          <button class="btn lnd-cta-ghost" data-act="goAuth" data-mode="login">${UI.icon('user')} Ya tengo cuenta · Iniciar sesión</button>
+        </div>
 
         <div class="lnd-stores">
           ${badge(apple, 'Descárgala en', 'App Store')}

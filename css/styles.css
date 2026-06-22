@@ -445,7 +445,9 @@ body.landing .ib-scrim { background: linear-gradient(180deg, transparent 0%, tra
 .award span { font-size: 11px; color: #33483c; margin-top: 3px; line-height: 1.25; }
 @keyframes lndFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
 @keyframes lndBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
-.lnd-login { background: none; color: #fff; font-weight: 800; font-size: 13px; text-shadow: 0 2px 8px rgba(18,64,98,.35); margin-top: 10px; text-decoration: underline; text-underline-offset: 3px; }
+.lnd-ctas { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 300px; margin-top: 12px; }
+.lnd-ctas .btn { width: 100%; box-shadow: 0 12px 28px rgba(22,138,75,.4); }
+.lnd-cta-ghost { background: rgba(255,255,255,.94); color: var(--brand-ink); border: 1px solid rgba(255,255,255,.7); box-shadow: 0 8px 20px rgba(18,64,98,.2) !important; }
 
 /* crear cuenta / iniciar sesión */
 .auth { position: relative; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; }
