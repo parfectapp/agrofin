@@ -100,7 +100,7 @@ window.Views = window.Views || {};
       <section class="lnd-body">
         <div class="lnd-eyebrow">Así se ve en tu teléfono</div>
         <h2 class="lnd-h2">Fácil de llenar, fácil de leer</h2>
-        <div class="lnd-phones">${phone(s1)}${phone(s2)}${phone(s3)}</div>
+        <div class="lnd-phones"><div class="lnd-phones-track">${phone(s1)}${phone(s2)}${phone(s3)}${phone(s1)}${phone(s2)}${phone(s3)}</div></div>
 
         <div class="lnd-eyebrow mt24">Todo tu invernadero, en un lugar</div>
         <h2 class="lnd-h2">Lleva el control sin complicarte</h2>

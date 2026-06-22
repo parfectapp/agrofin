@@ -481,9 +481,12 @@ body.landing .ib-scrim { background: linear-gradient(180deg, transparent 0%, tra
 .lnd-eyebrow { font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: #fff; text-align: center; text-shadow: 0 2px 10px rgba(18,64,98,.5); }
 .lnd-h2 { font-size: 25px; font-weight: 900; letter-spacing: -.02em; text-align: center; margin-top: 5px; margin-bottom: 18px; color: #fff; text-shadow: 0 4px 18px rgba(18,64,98,.45); }
 /* mockups de iphone (cómo se ve la app) */
-.lnd-phones { display: flex; gap: 16px; overflow-x: auto; padding: 6px 18px 14px; margin: 0 -18px 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
-.lnd-phones::-webkit-scrollbar { display: none; }
-.phone { flex: none; width: 190px; scroll-snap-align: center; border-radius: 30px; padding: 7px; background: linear-gradient(165deg, #26402f, #14241b); box-shadow: 0 22px 44px rgba(16,40,24,.32); }
+.lnd-phones { overflow: hidden; padding: 6px 0 14px 18px; margin: 0 -18px 4px; }
+.lnd-phones-track { display: flex; width: max-content; animation: phonesScroll 40s linear infinite; }
+.lnd-phones-track:hover { animation-play-state: paused; }
+@keyframes phonesScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.phone { flex: none; width: 190px; margin-right: 16px; border-radius: 30px; padding: 7px; background: linear-gradient(165deg, #26402f, #14241b); box-shadow: 0 22px 44px rgba(16,40,24,.32); }
+@media (prefers-reduced-motion: reduce) { .lnd-phones { overflow-x: auto; } .lnd-phones-track { animation: none; } }
 .phone-screen { position: relative; border-radius: 24px; overflow: hidden; background: linear-gradient(180deg, #e9f3e4, #ffffff 42%); height: 384px; }
 .phone-notch { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 52px; height: 15px; background: #14241b; border-radius: 99px; z-index: 3; }
 .pm { padding: 26px 11px 12px; color: var(--text); }
