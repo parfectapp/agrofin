@@ -139,20 +139,22 @@ window.Views = window.Views || {};
   /* ---------------- crear cuenta / iniciar sesión ---------------- */
   V.auth = function () {
     const signup = App.authMode === 'signup';
+    const busy = App.authBusy;
     return `<div class="lnd">
       <section class="auth">
         <button class="auth-back" data-act="go" data-route="landing">${UI.icon('back')} Volver</button>
         <div class="auth-card">
           <div class="center mb16">${UI.logo(56)}
             <div class="h2 mt8">${signup ? 'Crea tu cuenta' : 'Inicia sesión'}</div>
-            <div class="small muted">${signup ? 'Para guardar el control de tu invernadero.' : 'Entra a tu invernadero.'}</div></div>
+            <div class="small muted">${signup ? 'Para guardar y respaldar tu invernadero en la nube.' : 'Entra a tu invernadero desde cualquier teléfono.'}</div></div>
           ${App.authErr ? `<div class="auth-err">${UI.icon('warn', '', 14)} ${App.authErr}</div>` : ''}
-          <label class="field"><span class="flbl">Tu nombre</span><input class="input" id="au-name" placeholder="Ej. André" autocomplete="off"></label>
-          <label class="field"><span class="flbl">Contraseña</span><input class="input" id="au-pw" type="password" placeholder="Mínimo 4 caracteres"></label>
-          <button class="btn btn-primary mt8" data-act="doAuth">${UI.icon(signup ? 'sprout' : 'check')} ${signup ? 'Crear cuenta' : 'Entrar'}</button>
+          <label class="field"><span class="flbl">Correo</span><input class="input" id="au-email" type="email" inputmode="email" autocomplete="email" placeholder="tucorreo@ejemplo.com"></label>
+          <label class="field"><span class="flbl">Contraseña</span><input class="input" id="au-pw" type="password" autocomplete="${signup ? 'new-password' : 'current-password'}" placeholder="Mínimo 6 caracteres"></label>
+          <button class="btn btn-primary mt8" data-act="doAuth"${busy ? ' disabled' : ''}>${busy ? 'Conectando…' : (UI.icon(signup ? 'sprout' : 'check') + ' ' + (signup ? 'Crear cuenta' : 'Entrar'))}</button>
+          ${signup ? '' : `<button class="auth-forgot" data-act="resetPw">¿Olvidaste tu contraseña?</button>`}
           <div class="auth-toggle">${signup ? '¿Ya tienes cuenta?' : '¿Eres nuevo?'} <button data-act="setAuthMode" data-mode="${signup ? 'login' : 'signup'}">${signup ? 'Inicia sesión' : 'Crea una cuenta'}</button></div>
         </div>
-        <div class="auth-note">${UI.icon('info', '', 12)} Tu cuenta y tus datos se guardan solo en este teléfono.</div>
+        <div class="auth-note">${UI.icon('shield', '', 12)} Tus datos se respaldan en la nube de forma segura.</div>
       </section>
     </div>`;
   };
@@ -229,7 +231,7 @@ window.Views = window.Views || {};
 
       <div class="set-acct">
         <span class="set-av">${UI.initials(u)}</span>
-        <div class="grow"><div class="set-acct-n">${UI.esc(u)}</div><div class="set-acct-s">Sesión iniciada en este teléfono</div></div>
+        <div class="grow"><div class="set-acct-n">${UI.esc(u)}</div><div class="set-acct-s">${UI.esc(App.userEmail || 'Sesión iniciada')} · respaldo en la nube</div></div>
       </div>
 
       <div class="set-grp">Mi invernadero</div>

@@ -1,13 +1,33 @@
 /* ============ INVERNA · App shell, router y acciones ============ */
 const App = (() => {
-  let userId = Store.session();
-  let db = userId ? Store.load(userId) : Store.empty();
-  // las cuentas arrancan limpias; los datos de ejemplo son opcionales (Ajustes → "Cargar datos de ejemplo")
+  let userId = null;
+  let userEmail = '';
+  let db = Store.empty();
 
-  const state = { period: UI.todayKey(), gastoCat: '', cliSeg: 'clientes', pedFilter: 'todos', bitSeg: 'bitacora', taskFilter: 'todos', invKind: 'insumo', authMode: 'signup', authErr: null };
-  let route = userId ? 'home' : 'landing';
+  const state = { period: UI.todayKey(), gastoCat: '', cliSeg: 'clientes', pedFilter: 'todos', bitSeg: 'bitacora', taskFilter: 'todos', invKind: 'insumo', authMode: 'signup', authErr: null, authBusy: false };
+  let route = 'landing';
 
-  function save() { if (userId) Store.save(userId, db); }
+  let syncT = null;
+  function save() {
+    if (!userId) return;
+    Store.save(userId, db);                                   // caché local (instantáneo, offline)
+    if (Cloud.enabled()) { clearTimeout(syncT); syncT = setTimeout(() => Cloud.saveData(userId, db).catch(() => {}), 800); } // respaldo en la nube (con pausa)
+  }
+  async function loadUser() {
+    let data = null;
+    if (Cloud.enabled()) { try { data = await Cloud.loadData(userId); } catch (e) {} }
+    if (data == null) data = Store.load(userId);             // si la nube falla/offline, usa la caché
+    db = { ...Store.empty(), ...(data || {}) };
+    Store.save(userId, db);
+    if (Cloud.enabled() && data == null) { Cloud.saveData(userId, db).catch(() => {}); } // crea la fila en la nube
+  }
+  async function boot() {
+    Cloud.init();
+    if (Cloud.enabled()) {
+      try { const u = await Cloud.sessionUser(); if (u) { userId = u.id; userEmail = u.email || ''; await loadUser(); route = 'home'; } } catch (e) {}
+    }
+    render();
+  }
   function go(r) { route = r; window.scrollTo(0, 0); render(); }
 
   function shiftMonth(key, d) { let [y, m] = key.split('-').map(Number); m += d; while (m < 1) { m += 12; y--; } while (m > 12) { m -= 12; y++; } return y + '-' + String(m).padStart(2, '0'); }
@@ -52,31 +72,44 @@ const App = (() => {
   /* ============ acciones ============ */
   const A = {
     go: el => go(el.dataset.route),
-    goAuth: el => { state.authMode = (el && el.dataset.mode) || 'signup'; state.authErr = null; go('auth'); },
+    goAuth: el => { state.authMode = (el && el.dataset.mode) || 'signup'; state.authErr = null; state.authBusy = false; go('auth'); },
     setAuthMode: el => { state.authMode = el.dataset.mode; state.authErr = null; render(); },
     async doAuth() {
-      const mode = state.authMode;
-      const name = val('au-name'), pw = val('au-pw');
-      const fail = m => { state.authErr = m; render(); };
-      if (name.length < 2) return fail('Escribe tu nombre');
-      if (pw.length < 4) return fail('La contraseña necesita 4 caracteres o más');
-      const key = name.toLowerCase();
-      const us = Store.users();
-      const h = await Store.hash(pw);
-      if (mode === 'signup') {
-        if (us.some(u => u.name.toLowerCase() === key)) return fail('Ya existe una cuenta con ese nombre');
-        const id = Store.uid();
-        us.push({ id, name, pw: h }); Store.saveUsers(us); Store.setSession(id);
-        userId = id; db = Store.empty(); Store.save(id, db);
-        state.authErr = null; UI.toast('¡Cuenta creada!'); go('home');
-      } else {
-        const u = us.find(x => x.name.toLowerCase() === key);
-        if (!u || u.pw !== h) return fail('Nombre o contraseña incorrectos');
-        Store.setSession(u.id); userId = u.id; db = Store.load(u.id);
-        state.authErr = null; go('home');
+      const fail = m => { state.authErr = m; state.authBusy = false; render(); };
+      if (!Cloud.enabled()) return fail('Necesitas internet para entrar la primera vez.');
+      const signup = state.authMode === 'signup';
+      const email = val('au-email').toLowerCase(), pw = val('au-pw');
+      if (!/^\S+@\S+\.\S+$/.test(email)) return fail('Escribe un correo válido');
+      if (pw.length < 6) return fail('La contraseña necesita 6 caracteres o más');
+      state.authErr = null; state.authBusy = true; render();
+      try {
+        if (signup) {
+          await Cloud.signUp(email, pw);
+          const u = await Cloud.sessionUser();
+          if (!u) return fail('Cuenta creada. Revisa tu correo para confirmarla y luego inicia sesión.');
+          userId = u.id; userEmail = u.email || email; db = Store.empty(); Store.save(userId, db); Cloud.saveData(userId, db).catch(() => {});
+          state.authBusy = false; UI.toast('¡Cuenta creada!'); go('home');
+        } else {
+          await Cloud.signIn(email, pw);
+          const u = await Cloud.sessionUser();
+          userId = u.id; userEmail = u.email || email; await loadUser();
+          state.authBusy = false; go('home');
+        }
+      } catch (e) {
+        const m = (e && e.message) || '';
+        if (/already|registered|exists/i.test(m)) return fail('Ese correo ya tiene cuenta. Inicia sesión.');
+        if (/Invalid login|credentials/i.test(m)) return fail('Correo o contraseña incorrectos');
+        if (/not confirmed/i.test(m)) return fail('Confirma tu correo antes de entrar (revisa tu bandeja).');
+        return fail(m || 'No se pudo. Intenta de nuevo.');
       }
     },
-    logout() { Store.setSession(null); userId = null; db = Store.empty(); state.authErr = null; UI.closeSheet(); go('landing'); },
+    async resetPw() {
+      const email = val('au-email').toLowerCase();
+      if (!/^\S+@\S+\.\S+$/.test(email)) { state.authErr = 'Escribe tu correo arriba y vuelve a tocar aquí.'; return render(); }
+      try { await Cloud.resetPassword(email); state.authErr = null; UI.toast('Te enviamos un correo para restablecerla'); }
+      catch (e) { state.authErr = 'No se pudo enviar el correo'; render(); }
+    },
+    async logout() { UI.closeSheet(); await Cloud.signOut(); userId = null; userEmail = ''; db = Store.empty(); state.authErr = null; go('landing'); },
     seeLanding: () => { UI.closeSheet(); go('landing'); },
     goCortes: () => go('cortes'),
     goReceivable: () => { state.cliSeg = 'pedidos'; state.pedFilter = 'cobrar'; go('clientes'); },
@@ -344,8 +377,8 @@ const App = (() => {
     }
   });
 
-  document.addEventListener('DOMContentLoaded', render);
-  if (document.readyState !== 'loading') render();
+  document.addEventListener('DOMContentLoaded', boot);
+  if (document.readyState !== 'loading') boot();
 
   if ('serviceWorker' in navigator && location.protocol === 'https:') {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
@@ -356,7 +389,9 @@ const App = (() => {
     get db() { return db; },
     get authMode() { return state.authMode; },
     get authErr() { return state.authErr; },
-    get userName() { const u = Store.users().find(x => x.id === userId); return u ? u.name : ''; },
+    get authBusy() { return state.authBusy; },
+    get userEmail() { return userEmail; },
+    get userName() { return userEmail ? userEmail.split('@')[0] : ''; },
     get route() { return route; },
     get period() { return state.period; },
     get gastoCat() { return state.gastoCat; },
