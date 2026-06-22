@@ -221,26 +221,43 @@ window.Views = window.Views || {};
   /* ---------------- ajustes ---------------- */
   V.settings = function () {
     const p = App.db.products;
-    return `<div class="h2 mb4">Ajustes</div>
-      <p class="small muted mb16">${App.userName ? 'Sesión de <b>' + UI.esc(App.userName) + '</b> · ' : ''}Todo se guarda solo en este teléfono.</p>
+    const u = App.userName || 'Mi cuenta';
+    const row = (act, ic, color, label, sub, danger) => `<div class="set-row${danger ? ' danger' : ''}" data-act="${act}">
+      <span class="set-ic" style="--c:${color}">${UI.icon(ic, '', 19)}</span>
+      <div class="grow"><div class="set-t">${label}</div>${sub ? `<div class="set-s">${sub}</div>` : ''}</div></div>`;
+    return `<div class="sheet-head"><div class="h2">Ajustes</div><button class="iconbtn" data-act="closeSheet" aria-label="Cerrar">${UI.icon('x')}</button></div>
 
-      ${`<div class="field"><span class="flbl">Nombre del invernadero</span>
-        <div class="row gap8"><input class="input" id="set-name" value="${UI.esc(App.db.meta.name)}" style="flex:1"><button class="btn btn-sm btn-primary" data-act="saveName" style="width:auto">${UI.icon('check')}</button></div></div>`}
-
-      <div class="flbl mt8">Cultivos</div>
-      <div class="prod-wrap">
-        ${p.map(x => `<span class="prod-chip">${UI.esc(x)}<button data-act="delProduct" data-v="${UI.esc(x)}" aria-label="Quitar">${UI.icon('x', '', 13)}</button></span>`).join('') || '<span class="small muted">Aún no hay cultivos.</span>'}
+      <div class="set-acct">
+        <span class="set-av">${UI.initials(u)}</span>
+        <div class="grow"><div class="set-acct-n">${UI.esc(u)}</div><div class="set-acct-s">Sesión iniciada en este teléfono</div></div>
       </div>
-      <div class="row gap8 mt8"><input class="input" id="set-prod" placeholder="Agregar cultivo" style="flex:1"><button class="btn btn-sm btn-ghost" data-act="addProduct" style="width:auto">${UI.icon('plus')}</button></div>
 
-      <div class="divider"></div>
-      <button class="btn btn-ghost" data-act="seeLanding">${UI.icon('home')} Ver pantalla de inicio</button>
-      <button class="btn btn-ghost mt8" data-act="exportData">${UI.icon('download')} Exportar mis datos (.json)</button>
-      <button class="btn btn-ghost mt8" data-act="resetDemo">${UI.icon('info')} Cargar datos de ejemplo</button>
-      <button class="btn btn-danger mt8" data-act="wipeAll">${UI.icon('trash')} Borrar todo y empezar de cero</button>
-      <button class="btn btn-ghost mt8" data-act="logout">${UI.icon('back')} Cerrar sesión</button>
+      <div class="set-grp">Mi invernadero</div>
+      <div class="card">
+        <span class="flbl">Nombre</span>
+        <div class="row gap8"><input class="input" id="set-name" value="${UI.esc(App.db.meta.name)}" style="flex:1"><button class="btn btn-sm btn-primary" data-act="saveName" style="width:auto" aria-label="Guardar">${UI.icon('check')}</button></div>
+        <div class="flbl mt12">Cultivos</div>
+        <div class="prod-wrap">
+          ${p.map(x => `<span class="prod-chip">${UI.esc(x)}<button data-act="delProduct" data-v="${UI.esc(x)}" aria-label="Quitar">${UI.icon('x', '', 13)}</button></span>`).join('') || '<span class="small muted">Aún no hay cultivos.</span>'}
+        </div>
+        <div class="row gap8 mt8"><input class="input" id="set-prod" placeholder="Agregar cultivo" style="flex:1"><button class="btn btn-sm btn-ghost" data-act="addProduct" style="width:auto" aria-label="Agregar">${UI.icon('plus')}</button></div>
+      </div>
 
-      <div class="center mt20">${UI.logo(28)}<div class="tiny muted mt4">AGROFIN · v1 · Hecho para tu invernadero</div></div>
-      <button class="btn btn-ghost mt12" data-act="closeSheet">Cerrar</button>`;
+      <div class="set-grp">Datos</div>
+      <div class="card set-list">
+        ${row('exportData', 'download', '#3a92e0', 'Exportar mis datos', 'Guarda un respaldo (.json)')}
+        ${row('resetDemo', 'info', '#c4790f', 'Cargar datos de ejemplo', 'Para ver cómo se usa la app')}
+      </div>
+
+      <div class="set-grp">Cuenta</div>
+      <div class="card set-list">
+        ${row('seeLanding', 'home', '#178a4b', 'Ver pantalla de inicio')}
+        ${row('logout', 'user', '#6b7d72', 'Cerrar sesión')}
+        ${row('wipeAll', 'trash', '#cf3b2e', 'Borrar todo', 'Empieza de cero · no se puede deshacer', true)}
+      </div>
+
+      <div class="center mt20">${UI.logo(26)}
+        <div class="tiny muted mt4">AGROFIN · v1 · Hecho para tu invernadero</div>
+        <div class="tiny muted2 mt4">${UI.icon('info', '', 11)} Tus datos se guardan solo en este teléfono</div></div>`;
   };
 })(window.Views);
