@@ -163,13 +163,14 @@ body.is-scrolling .ib-bird, body.is-scrolling .ib-bee, body.is-scrolling .ib-bug
 .fadein { animation: fadein .26s ease; }
 @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-.topbar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 10px;
-  padding: calc(14px + env(safe-area-inset-top)) 2px 12px; background: linear-gradient(180deg, var(--bg) 74%, transparent); }
+.topbar { position: relative; z-index: 40; display: flex; align-items: center; gap: 10px;
+  padding: calc(14px + env(safe-area-inset-top)) 2px 12px; background: transparent; }
 .topbar h1 { font-size: 22px; font-weight: 900; letter-spacing: -.02em; }
 .topbar .sub { font-size: 12.5px; color: var(--muted); font-weight: 600; }
 .topbar .spacer { flex: 1; }
 
-.iconbtn { width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; background: var(--card); border: 1px solid var(--line); color: var(--text); flex: none; box-shadow: var(--shadow); }
+.iconbtn { width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; background: transparent; border: none; color: var(--text); flex: none; }
+.iconbtn:active { opacity: .55; }
 .iconbtn svg { width: 20px; height: 20px; }
 .iconbtn.primary { background: var(--brand); color: #fff; border-color: transparent; box-shadow: 0 8px 18px rgba(22,138,75,.30); }
 .iconbtn.danger { background: var(--card); color: var(--danger); border-color: rgba(207,59,46,.4); box-shadow: none; }
