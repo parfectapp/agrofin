@@ -28,7 +28,7 @@ window.Views = window.Views || {};
       return `<div class="lrow tap top" data-act="editLog" data-id="${l.id}">
         <span class="lic" style="color:${t.color};background:${UI.hexA(t.color, .12)}">${UI.dot(t.color)}</span>
         <div class="grow"><div class="row between"><span class="lt">${t.label}</span><span class="ls">${UI.date(l.date)}</span></div>
-          <div class="ls log-text">${UI.esc(l.text)}</div></div>
+          <div class="ls log-text">${UI.esc(l.text)}</div>${l.photos && l.photos.length ? `<div class="ls">${UI.icon('camera', '', 12)} ${l.photos.length} foto${l.photos.length > 1 ? 's' : ''}</div>` : ''}</div>
       </div>`;
     }).join('')}</div>`;
   }

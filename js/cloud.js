@@ -31,7 +31,17 @@ const Cloud = (() => {
   }
   async function signOut() { if (sb) { try { await sb.auth.signOut(); } catch (e) {} } }
   async function resetPassword(email) {
-    const { error } = await sb.auth.resetPasswordForEmail(email);
+    const redirectTo = window.location.origin + window.location.pathname; // vuelve a esta misma app
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) throw error;
+  }
+  // Avisa cuando el usuario llega desde el enlace del correo para poner nueva contraseña.
+  function onRecovery(cb) {
+    if (!sb) return;
+    sb.auth.onAuthStateChange((event, session) => { if (event === 'PASSWORD_RECOVERY') cb(session ? session.user : null); });
+  }
+  async function updatePassword(newPassword) {
+    const { error } = await sb.auth.updateUser({ password: newPassword });
     if (error) throw error;
   }
 
@@ -46,5 +56,5 @@ const Cloud = (() => {
     if (error) throw error;
   }
 
-  return { init, enabled, sessionUser, signUp, signIn, signOut, resetPassword, loadData, saveData };
+  return { init, enabled, sessionUser, signUp, signIn, signOut, resetPassword, onRecovery, updatePassword, loadData, saveData };
 })();

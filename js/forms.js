@@ -17,21 +17,42 @@ const Forms = (() => {
   const head = (title, id, delAct) => `<div class="sheet-head"><div class="h2">${title}</div>${id && delAct ? `<button class="iconbtn danger" data-act="${delAct}" data-id="${id}">${UI.icon('trash')}</button>` : ''}</div>`;
   const saveBtn = (act, id, label) => `<button class="btn btn-primary mt8" data-act="${act}" data-id="${id || ''}">${UI.icon('check')} ${label}</button>`;
 
+  /* ---------------- fotos (recibo, corte, planta…) ---------------- */
+  let photos = [];                                   // fotos del formulario abierto (data URLs)
+  const setPhotos = arr => { photos = Array.isArray(arr) ? arr.slice() : []; };
+  const getPhotos = () => photos;
+  function thumbs() {
+    if (!photos.length) return '';
+    return photos.map((src, i) => `<div class="photo-thumb">
+        <img src="${src}" data-act="zoomPhoto" data-i="${i}" alt="foto">
+        <button type="button" class="photo-del" data-act="delPhoto" data-i="${i}" aria-label="Quitar">${UI.icon('x', '', 13)}</button>
+      </div>`).join('');
+  }
+  function photoField(hint) {
+    return fblock('Fotos (opcional)',
+      `<div class="photos" id="photos-wrap">${thumbs()}</div>
+       <label class="photo-add">${UI.icon('camera', '', 17)} Agregar foto<input type="file" id="photo-input" accept="image/*" hidden></label>`,
+      hint || 'Toma o sube una foto: recibo, factura, corte o la planta.');
+  }
+
   /* ---------------- gasto ---------------- */
   function expense(e = {}) {
     const isEdit = !!e.id;
+    setPhotos(e.photos);
     return head(isEdit ? 'Editar gasto' : 'Nuevo gasto', e.id, 'delExpense')
       + fblock('Categoría', pick('cat', Data.CATS, e.cat || 'insumos'))
       + f('Fecha', inp('e-date', 'type="date"', e.date || today()))
       + f('Concepto', inp('e-concept', 'placeholder="Ej. Fertilizante NPK"', e.concept))
       + f('Monto (MXN)', inp('e-amount', 'type="number" inputmode="decimal" placeholder="0"', e.amount))
       + f('Nota (opcional)', ta('e-note', e.note, 'Detalle, lote, proveedor…'))
+      + photoField('Foto del recibo o la factura.')
       + saveBtn('saveExpense', e.id, isEdit ? 'Guardar cambios' : 'Registrar gasto');
   }
 
   /* ---------------- corte / producción ---------------- */
   function harvest(h = {}) {
     const isEdit = !!h.id;
+    setPhotos(h.photos);
     return head(isEdit ? 'Editar corte' : 'Nuevo corte', h.id, 'delHarvest')
       + f('Fecha del corte', inp('h-date', 'type="date"', h.date || today()))
       + f('Cultivo', inp('h-product', 'list="prods" placeholder="Ej. Jitomate"', h.product || App.db.products[0] || '') + dlist())
@@ -40,6 +61,7 @@ const Forms = (() => {
           'Anota en kilos o en toneladas.')
       + fblock('Calidad', pick('quality', Data.QUALITIES, h.quality || 'primera'))
       + f('Nota (opcional)', ta('h-note', h.note, 'Lote, observaciones…'))
+      + photoField('Foto del corte o de la fruta.')
       + saveBtn('saveHarvest', h.id, isEdit ? 'Guardar cambios' : 'Registrar corte');
   }
 
@@ -98,10 +120,12 @@ const Forms = (() => {
   /* ---------------- bitácora ---------------- */
   function log(l = {}) {
     const isEdit = !!l.id;
+    setPhotos(l.photos);
     return head(isEdit ? 'Editar registro' : 'Registro de bitácora', l.id, 'delLog')
       + f('Fecha', inp('l-date', 'type="date"', l.date || today()))
       + fblock('Tipo', pick('tag', Data.LOGTAGS, l.tag || 'nota'))
       + f('¿Qué pasó?', ta('l-text', l.text, 'Riego, fumigación, incidencia, observación…'))
+      + photoField('Foto de la planta, plaga o lo que observaste.')
       + saveBtn('saveLog', l.id, isEdit ? 'Guardar cambios' : 'Agregar a bitácora');
   }
 
@@ -176,5 +200,5 @@ const Forms = (() => {
       + saveBtn('saveCycle', '', 'Guardar ciclo');
   }
 
-  return { expense, harvest, client, order, payment, log, note, task, irrigation, application, invItem, cycle };
+  return { expense, harvest, client, order, payment, log, note, task, irrigation, application, invItem, cycle, getPhotos, setPhotos, thumbs };
 })();

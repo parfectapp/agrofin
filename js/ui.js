@@ -47,6 +47,8 @@ const UI = (() => {
     pin:     '<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/>',
     shield:  '<path d="M12 3 5 6v5c0 5 3.5 8 7 10 3.5-2 7-5 7-10V6l-7-3Z"/><path d="m9 11.5 2 2 4-4.2"/>',
     droplet: '<path d="M12 3c4 5 6.5 8.5 6.5 12a6.5 6.5 0 0 1-13 0c0-3.5 2.5-7 6.5-12Z"/>',
+    camera:  '<path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L19 6h0a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.4"/>',
+    key:     '<circle cx="8" cy="8" r="4.5"/><path d="M11.2 11.2 20 20M16 16l2-2M14 18l2-2"/>',
   };
   function icon(name, cls, size) {
     const p = ICONS[name] || ICONS.tag;
@@ -152,6 +154,26 @@ const UI = (() => {
   }
   function closeSheet() { document.getElementById('sheet-root').innerHTML = ''; }
 
+  // ---- fotos: comprime una imagen del usuario a JPEG pequeño (data URL) ----
+  function compressImage(file, maxDim, quality) {
+    maxDim = maxDim || 1280; quality = quality || 0.6;
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+        const scale = Math.min(1, maxDim / Math.max(w, h));
+        w = Math.max(1, Math.round(w * scale)); h = Math.max(1, Math.round(h * scale));
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        try { resolve(cv.toDataURL('image/jpeg', quality)); } catch (e) { reject(e); }
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('No se pudo leer la imagen')); };
+      img.src = url;
+    });
+  }
+
   // ---- estado vacío ----
   function empty(ic, title, sub) {
     return `<div class="empty"><div class="empty-ic">${icon(ic, '', 30)}</div><div class="empty-t">${title}</div>${sub ? `<div class="empty-s">${sub}</div>` : ''}</div>`;
@@ -161,6 +183,6 @@ const UI = (() => {
     esc, initials, icon, logo, hexA, lighten, cicon,
     money, num, pct, weight, ton,
     date, dateLong, monthKey, monthLabel, todayISO, todayKey, MESL,
-    bar, dot, toast, sheet, modal, closeSheet, empty,
+    bar, dot, toast, sheet, modal, closeSheet, empty, compressImage,
   };
 })();

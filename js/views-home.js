@@ -159,6 +159,25 @@ window.Views = window.Views || {};
     </div>`;
   };
 
+  V.recovery = function () {
+    const busy = App.authBusy;
+    return `<div class="lnd">
+      <section class="auth">
+        <div class="auth-card">
+          <div class="center mb16">${UI.logo(56)}
+            <div class="h2 mt8">Nueva contraseña</div>
+            <div class="small muted">Escribe la nueva contraseña para tu cuenta.</div></div>
+          ${App.authErr ? `<div class="auth-err">${UI.icon('warn', '', 14)} ${App.authErr}</div>` : ''}
+          <label class="field"><span class="flbl">Nueva contraseña</span><input class="input" id="rec-pw" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres"></label>
+          <label class="field"><span class="flbl">Repite la contraseña</span><input class="input" id="rec-pw2" type="password" autocomplete="new-password" placeholder="Otra vez la misma"></label>
+          <button class="btn btn-primary mt8" data-act="doUpdatePw"${busy ? ' disabled' : ''}>${busy ? 'Guardando…' : (UI.icon('key') + ' Guardar contraseña')}</button>
+          <div class="auth-toggle"><button data-act="goAuth" data-mode="login">Cancelar</button></div>
+        </div>
+        <div class="auth-note">${UI.icon('shield', '', 12)} Tu cuenta y tus datos siguen seguros.</div>
+      </section>
+    </div>`;
+  };
+
   V.home = function () {
     const key = App.period;
     const s = Q.monthSummary(key);

@@ -44,6 +44,10 @@ const App = (() => {
   }
   async function boot() {
     Cloud.init();
+    // Llega desde el enlace del correo para poner nueva contraseña
+    const recovery = /type=recovery/.test(location.hash || '') || /type=recovery/.test(location.search || '');
+    Cloud.onRecovery(u => { if (u) { userId = u.id; userEmail = u.email || ''; } route = 'recovery'; render(); });
+    if (recovery) { route = 'recovery'; render(); return; }
     if (Cloud.enabled()) {
       try { const u = await Cloud.sessionUser(); if (u) { userId = u.id; userEmail = u.email || ''; await loadUser(); route = 'home'; } } catch (e) {}
     }
@@ -68,10 +72,11 @@ const App = (() => {
 
   function render() {
     const root = document.getElementById('root');
-    const full = (route === 'landing' || route === 'auth');
+    const full = (route === 'landing' || route === 'auth' || route === 'recovery');
     document.body.classList.toggle('landing', full);
     if (route === 'landing') { root.innerHTML = `<div class="fadein">${Views.landing()}</div>`; return; }
     if (route === 'auth') { root.innerHTML = `<div class="fadein">${Views.auth()}</div>`; return; }
+    if (route === 'recovery') { root.innerHTML = `<div class="fadein">${Views.recovery()}</div>`; return; }
     if (!userId) { route = 'landing'; root.innerHTML = `<div class="fadein">${Views.landing()}</div>`; return; }
     const view = Views[route] || Views.home;
     root.innerHTML = `<div class="screen"><div class="fadein">${view()}</div></div>` + tabbar();
@@ -83,6 +88,7 @@ const App = (() => {
   const sheetPick = g => document.querySelector(`.pick[data-g="${g}"] .chip.on`)?.dataset.v;
   const addProductIfNew = p => { if (p && !db.products.includes(p)) db.products.push(p); };
   const find = (k, id) => db[k].find(x => x.id === id);
+  const renderPhotos = () => { const w = document.getElementById('photos-wrap'); if (w) w.innerHTML = Forms.thumbs(); }; // refresca solo las miniaturas (no pierde lo escrito)
 
   function confirmDel(kind, id, label) {
     UI.modal(`<div class="h3 mb8">¿Eliminar ${label}?</div><p class="muted small mb16">No se puede deshacer.</p>
@@ -130,6 +136,24 @@ const App = (() => {
       try { await Cloud.resetPassword(email); state.authErr = null; UI.toast('Te enviamos un correo para restablecerla'); }
       catch (e) { state.authErr = 'No se pudo enviar el correo'; render(); }
     },
+    async doUpdatePw() {
+      const fail = m => { state.authErr = m; state.authBusy = false; render(); };
+      const pw = val('rec-pw'), pw2 = val('rec-pw2');
+      if (pw.length < 6) return fail('La contraseña necesita 6 caracteres o más');
+      if (pw !== pw2) return fail('Las contraseñas no coinciden');
+      state.authErr = null; state.authBusy = true; render();
+      try {
+        await Cloud.updatePassword(pw);
+        try { history.replaceState(null, '', location.pathname); } catch (e) {} // limpia el #token del enlace
+        const u = await Cloud.sessionUser();
+        if (u) { userId = u.id; userEmail = u.email || ''; await loadUser(); }
+        state.authBusy = false; UI.toast('Contraseña actualizada'); go(userId ? 'home' : 'auth');
+      } catch (e) {
+        const m = (e && e.message) || '';
+        if (/session|expired|missing|token/i.test(m)) return fail('El enlace ya expiró. Pide otro correo para restablecer tu contraseña.');
+        return fail(m || 'No se pudo actualizar la contraseña.');
+      }
+    },
     async logout() { UI.closeSheet(); await Cloud.signOut(); userId = null; userEmail = ''; db = Store.empty(); state.authErr = null; go('landing'); },
     seeLanding: () => { UI.closeSheet(); go('landing'); },
     goCortes: () => go('cortes'),
@@ -137,6 +161,21 @@ const App = (() => {
     closeSheet: () => UI.closeSheet(),
     closeBg: (el, ev) => { if (ev.target === el) UI.closeSheet(); },
     pick: el => { const g = el.closest('.pick'); if (!g) return; g.querySelectorAll('[data-pick]').forEach(b => b.classList.remove('on')); el.classList.add('on'); },
+
+    /* ---- fotos en formularios ---- */
+    async onPhotoPick(el) {
+      const files = Array.from(el.files || []);
+      el.value = '';                                   // permite volver a elegir la misma foto
+      const photos = Forms.getPhotos();
+      for (const file of files) {
+        if (!file.type || file.type.indexOf('image/') !== 0) continue;
+        if (photos.length >= 8) { UI.toast('Máximo 8 fotos'); break; }
+        try { photos.push(await UI.compressImage(file)); } catch (e) { UI.toast('No se pudo agregar la foto'); }
+      }
+      renderPhotos();
+    },
+    delPhoto(el) { Forms.getPhotos().splice(+el.dataset.i, 1); renderPhotos(); },
+    zoomPhoto(el) { const src = Forms.getPhotos()[+el.dataset.i]; if (src) UI.modal(`<img class="photo-full" src="${src}" alt="foto"><div class="btn-row mt12"><button class="btn btn-ghost" data-act="closeSheet">Cerrar</button></div>`); },
 
     prevMonth: () => { state.period = shiftMonth(state.period, -1); render(); },
     nextMonth: () => { state.period = shiftMonth(state.period, 1); render(); },
@@ -153,7 +192,7 @@ const App = (() => {
       const id = el.dataset.id;
       const amount = numv('e-amount');
       if (amount <= 0) return UI.toast('Anota el monto del gasto');
-      const data = { cat: sheetPick('cat') || 'otros', date: val('e-date') || UI.todayISO(), concept: val('e-concept'), amount, note: val('e-note') };
+      const data = { cat: sheetPick('cat') || 'otros', date: val('e-date') || UI.todayISO(), concept: val('e-concept'), amount, note: val('e-note'), photos: Forms.getPhotos() };
       if (id) Object.assign(find('expenses', id), data);
       else db.expenses.push({ id: Store.uid(), ...data });
       save(); UI.closeSheet(); UI.toast(id ? 'Gasto actualizado' : 'Gasto registrado'); render();
@@ -171,7 +210,7 @@ const App = (() => {
       if (qty <= 0) return UI.toast('Anota la cantidad');
       const kg = (sheetPick('unit') === 't') ? qty * 1000 : qty;
       addProductIfNew(product);
-      const data = { date: val('h-date') || UI.todayISO(), product, kg, quality: sheetPick('quality') || 'primera', note: val('h-note') };
+      const data = { date: val('h-date') || UI.todayISO(), product, kg, quality: sheetPick('quality') || 'primera', note: val('h-note'), photos: Forms.getPhotos() };
       if (id) Object.assign(find('harvests', id), data);
       else db.harvests.push({ id: Store.uid(), ...data });
       save(); UI.closeSheet(); UI.toast(id ? 'Corte actualizado' : 'Corte registrado'); render();
@@ -235,7 +274,7 @@ const App = (() => {
       const id = el.dataset.id;
       const text = val('l-text');
       if (!text) return UI.toast('Escribe qué pasó');
-      const data = { date: val('l-date') || UI.todayISO(), tag: sheetPick('tag') || 'nota', text };
+      const data = { date: val('l-date') || UI.todayISO(), tag: sheetPick('tag') || 'nota', text, photos: Forms.getPhotos() };
       if (id) Object.assign(find('log', id), data);
       else db.log.push({ id: Store.uid(), ...data });
       save(); UI.closeSheet(); UI.toast(id ? 'Registro actualizado' : 'Agregado a la bitácora'); render();
@@ -388,6 +427,9 @@ const App = (() => {
     const fn = A[el.dataset.act];
     if (fn) { ev.preventDefault(); fn(el, ev); }
   });
+
+  // selección de fotos (input file)
+  document.addEventListener('change', ev => { if (ev.target && ev.target.id === 'photo-input') A.onPhotoPick(ev.target); });
 
   // total en vivo del pedido
   document.addEventListener('input', ev => {

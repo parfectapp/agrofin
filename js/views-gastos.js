@@ -36,7 +36,7 @@ window.Views = window.Views || {};
         const c = Data.catOf(e.cat);
         return `<div class="lrow tap" data-act="editExpense" data-id="${e.id}">
           <span class="lic" style="color:${c.color};background:${UI.hexA(c.color, .12)}">${UI.icon(c.icon, '', 17)}</span>
-          <div class="grow"><div class="lt">${UI.esc(e.concept || c.label)}</div><div class="ls">${c.label} · ${UI.date(e.date)}${e.note ? ' · ' + UI.esc(e.note) : ''}</div></div>
+          <div class="grow"><div class="lt">${UI.esc(e.concept || c.label)}</div><div class="ls">${c.label} · ${UI.date(e.date)}${e.note ? ' · ' + UI.esc(e.note) : ''}${e.photos && e.photos.length ? ` · ${UI.icon('camera', '', 12)} ${e.photos.length}` : ''}</div></div>
           <div class="lr neg">−${UI.money(e.amount)}</div>
         </div>`;
       }).join('') : UI.empty('money', cat ? 'Sin gastos en esta categoría' : 'Sin gastos este mes', 'Toca + para registrar uno.')}

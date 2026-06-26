@@ -34,7 +34,7 @@ window.Views = window.Views || {};
         const q = Data.qualOf(h.quality);
         return `<div class="lrow tap" data-act="editHarvest" data-id="${h.id}">
           <span class="lic" style="color:${q.color};background:${UI.hexA(q.color, .12)}">${UI.icon('sprout', '', 17)}</span>
-          <div class="grow"><div class="lt">${UI.esc(h.product)}</div><div class="ls">${q.label} · ${UI.date(h.date)}${h.note ? ' · ' + UI.esc(h.note) : ''}</div></div>
+          <div class="grow"><div class="lt">${UI.esc(h.product)}</div><div class="ls">${q.label} · ${UI.date(h.date)}${h.note ? ' · ' + UI.esc(h.note) : ''}${h.photos && h.photos.length ? ` · ${UI.icon('camera', '', 12)} ${h.photos.length}` : ''}</div></div>
           <div class="lr">${UI.weight(h.kg)}</div>
         </div>`;
       }).join('') : UI.empty('sprout', 'Sin cortes este mes', 'Toca + para anotar un corte.')}
