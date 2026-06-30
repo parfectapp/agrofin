@@ -14,9 +14,23 @@ const Store = (() => {
 
   function load(uid) {
     try { const raw = localStorage.getItem(dkey(uid)); if (raw) return { ...empty(), ...JSON.parse(raw) }; } catch (e) {}
-    return empty();
+    return null;                                              // null = no hay nada en este dispositivo
   }
-  function save(uid, s) { try { localStorage.setItem(dkey(uid), JSON.stringify(s)); } catch (e) {} }
+  // Quita las fotos (pesadas) para una copia ligera de respaldo local.
+  const PHOTO_KEYS = ['expenses', 'harvests', 'log'];
+  function stripPhotos(s) {
+    const c = { ...s };
+    for (const k of PHOTO_KEYS) if (Array.isArray(c[k])) c[k] = c[k].map(r => (r && r.photos && r.photos.length) ? { ...r, photos: [] } : r);
+    return c;
+  }
+  // Guarda en caché; si no cabe (fotos), guarda al menos los datos sin fotos para no perderlos.
+  function save(uid, s) {
+    try { localStorage.setItem(dkey(uid), JSON.stringify(s)); return true; }
+    catch (e) {
+      try { localStorage.setItem(dkey(uid), JSON.stringify(stripPhotos(s))); } catch (e2) {}
+      return false;
+    }
+  }
   function wipe(uid) { try { localStorage.removeItem(dkey(uid)); } catch (e) {} }
 
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);

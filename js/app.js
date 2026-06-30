@@ -10,18 +10,18 @@ const App = (() => {
   let syncT = null;
   function save() {
     if (!userId) return;
+    db._savedAt = Date.now();                                 // marca de tiempo para saber cuál copia es la más nueva
     Store.save(userId, db);                                   // caché local (instantáneo, offline)
     if (Cloud.enabled()) { clearTimeout(syncT); syncT = setTimeout(() => Cloud.saveData(userId, db).catch(() => {}), 800); } // respaldo en la nube (con pausa)
   }
   const REC_KEYS = ['expenses', 'harvests', 'orders', 'clients', 'tasks', 'irrigations', 'applications', 'inventory', 'log', 'notes'];
   function countRecords(d) { return d ? REC_KEYS.reduce((s, k) => s + ((d[k] || []).length), 0) : 0; }
-  // Busca datos de versiones anteriores (guardados solo en el dispositivo) para recuperarlos.
+  // Busca datos de versiones ANTERIORES (guardados solo en el dispositivo, antes de la nube) para recuperarlos.
   function findLegacyData() {
     let best = null, bestN = 0;
     try {
       for (const k of Object.keys(localStorage)) {
-        if (k === 'agrofin_cache__' + userId) continue; // la caché de esta misma cuenta ya se consideró
-        if (k === 'inverna_v1' || k.indexOf('inverna_db__') === 0 || k.indexOf('agrofin_cache__') === 0) {
+        if (k === 'inverna_v1' || k.indexOf('inverna_db__') === 0) {
           try { const d = JSON.parse(localStorage.getItem(k)); const n = countRecords(d); if (n > bestN) { bestN = n; best = d; } } catch (e) {}
         }
       }
@@ -29,13 +29,17 @@ const App = (() => {
     return bestN > 0 ? best : null;
   }
   async function loadUser() {
-    let data = null;
-    if (Cloud.enabled()) { try { data = await Cloud.loadData(userId); } catch (e) {} }
-    if (data == null) data = Store.load(userId);             // si la nube falla/offline, usa la caché
-    if (countRecords(data) === 0) { const legacy = findLegacyData(); if (legacy) data = legacy; } // recupera datos viejos del dispositivo
+    let cloud = null;
+    if (Cloud.enabled()) { try { cloud = await Cloud.loadData(userId); } catch (e) {} }
+    const cache = Store.load(userId);                          // null si no hay nada en este dispositivo
+    // Elige la copia MÁS NUEVA (evita que la nube vieja borre cambios hechos sin internet).
+    let data;
+    if (cloud && cache) data = ((cache._savedAt || 0) > (cloud._savedAt || 0)) ? cache : cloud;
+    else data = cloud || cache;
+    if (countRecords(data) === 0) { const legacy = findLegacyData(); if (legacy) data = legacy; } // recupera datos de versiones viejas
     db = { ...Store.empty(), ...(data || {}) };
     Store.save(userId, db);
-    if (Cloud.enabled()) { Cloud.saveData(userId, db).catch(() => {}); } // respalda en la nube (incluye lo recuperado)
+    if (Cloud.enabled()) { Cloud.saveData(userId, db).catch(() => {}); } // respalda en la nube (incluye lo recuperado / lo más nuevo)
   }
   function flushSync() { // sube de inmediato lo pendiente (al cerrar / cambiar de app)
     if (!userId || !Cloud.enabled()) return;
@@ -169,7 +173,7 @@ const App = (() => {
       const photos = Forms.getPhotos();
       for (const file of files) {
         if (!file.type || file.type.indexOf('image/') !== 0) continue;
-        if (photos.length >= 8) { UI.toast('Máximo 8 fotos'); break; }
+        if (photos.length >= 6) { UI.toast('Máximo 6 fotos'); break; }
         try { photos.push(await UI.compressImage(file)); } catch (e) { UI.toast('No se pudo agregar la foto'); }
       }
       renderPhotos();

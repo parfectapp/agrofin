@@ -156,7 +156,7 @@ const UI = (() => {
 
   // ---- fotos: comprime una imagen del usuario a JPEG pequeño (data URL) ----
   function compressImage(file, maxDim, quality) {
-    maxDim = maxDim || 1280; quality = quality || 0.6;
+    maxDim = maxDim || 1100; quality = quality || 0.5;
     return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(file);
       const img = new Image();
