@@ -19,10 +19,16 @@ const Cloud = (() => {
     return data && data.session ? data.session.user : null;
   }
 
+  const appUrl = () => window.location.origin + window.location.pathname; // a dónde vuelve el enlace del correo
   async function signUp(email, password) {
-    const { data, error } = await sb.auth.signUp({ email, password });
+    const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: appUrl() } });
     if (error) throw error;
     return data;
+  }
+  // Reenvía el correo de confirmación de cuenta.
+  async function resendConfirmation(email) {
+    const { error } = await sb.auth.resend({ type: 'signup', email, options: { emailRedirectTo: appUrl() } });
+    if (error) throw error;
   }
   async function signIn(email, password) {
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
@@ -31,8 +37,7 @@ const Cloud = (() => {
   }
   async function signOut() { if (sb) { try { await sb.auth.signOut(); } catch (e) {} } }
   async function resetPassword(email) {
-    const redirectTo = window.location.origin + window.location.pathname; // vuelve a esta misma app
-    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: appUrl() }); // vuelve a esta misma app
     if (error) throw error;
   }
   // Avisa cuando el usuario llega desde el enlace del correo para poner nueva contraseña.
@@ -56,5 +61,5 @@ const Cloud = (() => {
     if (error) throw error;
   }
 
-  return { init, enabled, sessionUser, signUp, signIn, signOut, resetPassword, onRecovery, updatePassword, loadData, saveData };
+  return { init, enabled, sessionUser, signUp, signIn, signOut, resetPassword, resendConfirmation, onRecovery, updatePassword, loadData, saveData };
 })();

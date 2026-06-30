@@ -4,7 +4,7 @@ const App = (() => {
   let userEmail = '';
   let db = Store.empty();
 
-  const state = { period: UI.todayKey(), gastoCat: '', cliSeg: 'clientes', pedFilter: 'todos', bitSeg: 'bitacora', taskFilter: 'todos', invKind: 'insumo', authMode: 'signup', authErr: null, authBusy: false };
+  const state = { period: UI.todayKey(), gastoCat: '', cliSeg: 'clientes', pedFilter: 'todos', bitSeg: 'bitacora', taskFilter: 'todos', invKind: 'insumo', authMode: 'signup', authErr: null, authBusy: false, pendingEmail: '' };
   let route = 'landing';
 
   let syncT = null;
@@ -52,8 +52,15 @@ const App = (() => {
     const recovery = /type=recovery/.test(location.hash || '') || /type=recovery/.test(location.search || '');
     Cloud.onRecovery(u => { if (u) { userId = u.id; userEmail = u.email || ''; } route = 'recovery'; render(); });
     if (recovery) { route = 'recovery'; render(); return; }
+    const confirmed = /type=signup/.test(location.hash || '') || /type=signup/.test(location.search || ''); // llega desde el correo de confirmación
     if (Cloud.enabled()) {
-      try { const u = await Cloud.sessionUser(); if (u) { userId = u.id; userEmail = u.email || ''; await loadUser(); route = 'home'; } } catch (e) {}
+      try {
+        const u = await Cloud.sessionUser();
+        if (u) {
+          userId = u.id; userEmail = u.email || ''; await loadUser(); route = 'home';
+          if (confirmed) { try { history.replaceState(null, '', location.pathname); } catch (e) {} setTimeout(() => UI.toast('¡Correo confirmado! Bienvenido a AGROFIN'), 350); }
+        }
+      } catch (e) {}
     }
     render();
   }
@@ -76,11 +83,12 @@ const App = (() => {
 
   function render() {
     const root = document.getElementById('root');
-    const full = (route === 'landing' || route === 'auth' || route === 'recovery');
+    const full = (route === 'landing' || route === 'auth' || route === 'recovery' || route === 'checkEmail');
     document.body.classList.toggle('landing', full);
     if (route === 'landing') { root.innerHTML = `<div class="fadein">${Views.landing()}</div>`; return; }
     if (route === 'auth') { root.innerHTML = `<div class="fadein">${Views.auth()}</div>`; return; }
     if (route === 'recovery') { root.innerHTML = `<div class="fadein">${Views.recovery()}</div>`; return; }
+    if (route === 'checkEmail') { root.innerHTML = `<div class="fadein">${Views.checkEmail()}</div>`; return; }
     if (!userId) { route = 'landing'; root.innerHTML = `<div class="fadein">${Views.landing()}</div>`; return; }
     const view = Views[route] || Views.home;
     root.innerHTML = `<div class="screen"><div class="fadein">${view()}</div></div>` + tabbar();
@@ -117,7 +125,7 @@ const App = (() => {
         if (signup) {
           await Cloud.signUp(email, pw);
           const u = await Cloud.sessionUser();
-          if (!u) return fail('Cuenta creada. Revisa tu correo para confirmarla y luego inicia sesión.');
+          if (!u) { state.pendingEmail = email; state.authErr = null; state.authBusy = false; go('checkEmail'); return; } // verificación de correo activada
           userId = u.id; userEmail = u.email || email; db = Store.empty(); Store.save(userId, db); Cloud.saveData(userId, db).catch(() => {});
           state.authBusy = false; UI.toast('¡Cuenta creada!'); go('home');
         } else {
@@ -139,6 +147,11 @@ const App = (() => {
       if (!/^\S+@\S+\.\S+$/.test(email)) { state.authErr = 'Escribe tu correo arriba y vuelve a tocar aquí.'; return render(); }
       try { await Cloud.resetPassword(email); state.authErr = null; UI.toast('Te enviamos un correo para restablecerla'); }
       catch (e) { state.authErr = 'No se pudo enviar el correo'; render(); }
+    },
+    async resendEmail() {
+      if (!state.pendingEmail) return;
+      try { await Cloud.resendConfirmation(state.pendingEmail); UI.toast('Te reenviamos el correo de confirmación'); }
+      catch (e) { UI.toast('No se pudo reenviar el correo'); }
     },
     async doUpdatePw() {
       const fail = m => { state.authErr = m; state.authBusy = false; render(); };
@@ -463,6 +476,7 @@ const App = (() => {
     get authBusy() { return state.authBusy; },
     get userEmail() { return userEmail; },
     get userName() { return userEmail ? userEmail.split('@')[0] : ''; },
+    get pendingEmail() { return state.pendingEmail; },
     get route() { return route; },
     get period() { return state.period; },
     get gastoCat() { return state.gastoCat; },

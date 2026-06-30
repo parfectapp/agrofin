@@ -178,6 +178,22 @@ window.Views = window.Views || {};
     </div>`;
   };
 
+  V.checkEmail = function () {
+    const email = App.pendingEmail || 'tu correo';
+    return `<div class="lnd">
+      <section class="auth">
+        <div class="auth-card">
+          <div class="center mb16">${UI.logo(56)}
+            <div class="h2 mt8">Revisa tu correo</div>
+            <div class="small muted">Te enviamos un enlace a <b>${UI.esc(email)}</b> para confirmar tu cuenta. Ábrelo desde este teléfono y entrarás solo.</div></div>
+          <button class="btn btn-primary mt8" data-act="resendEmail">${UI.icon('share')} Reenviar correo</button>
+          <div class="auth-toggle">¿Ya confirmaste? <button data-act="goAuth" data-mode="login">Inicia sesión</button></div>
+        </div>
+        <div class="auth-note">${UI.icon('shield', '', 12)} Confirmar tu correo protege tu cuenta.</div>
+      </section>
+    </div>`;
+  };
+
   V.home = function () {
     const key = App.period;
     const s = Q.monthSummary(key);
